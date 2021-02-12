@@ -33,6 +33,14 @@ const weeks = [
     { value: 'week 4', label: 'Week 4' },
 ]
 
+const months = [
+    { value: '01', label: 'January' }, { value: '02', label: 'February' },
+    { value: '03', label: 'March' }, { value: '04', label: 'April' },{ value: '05', label: 'May' },
+    { value: '06', label: 'June' }, { value: '07', label: 'July' },{ value: '08', label: 'August' },
+    { value: '09', label: 'September' },{ value: '10', label: 'October' },{ value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+]
+
 
 const MainForm = (props) => {
 
@@ -76,6 +84,11 @@ const MainForm = (props) => {
                             <MDBCardText>
                                 <strong>Select Event Details</strong>
                             </MDBCardText>
+
+                            {programs.length == 0 ? <div className="spinner-border mx-2 indigo-text spinner-border-sm" role="status">
+                                <span className="sr-only">Loading...</span>
+                            </div> : null}
+
                             <hr/>
 
                             <MDBContainer className="pl-5 mt-3">
@@ -103,7 +116,7 @@ const MainForm = (props) => {
                                                 isMulti
                                                 components={animatedComponents}
                                                 onChange={handleChange}
-                                                options={weeks}
+                                                options={months}
                                             />
                                         </div>
                                     </MDBCol>

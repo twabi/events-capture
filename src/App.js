@@ -3,10 +3,7 @@ import './App.css';
 import NavBar from "./NavBar";
 import MainForm from "./MainForm";
 import {d2, init, getInstance} from 'd2';
-import {
-    Switch,
-    Route
-} from "react-router-dom";
+import {Switch, Route} from "react-router-dom";
 
 
 //authentication for the namis api
