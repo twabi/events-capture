@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {MDBContainer, MDBRow, MDBIcon} from "mdbreact";
 import { MDBDropdown, MDBDropdownToggle, MDBDropdownMenu, MDBDropdownItem } from "mdbreact";
 import {DatePicker, TreeSelect} from "antd";
@@ -16,6 +16,7 @@ import { Menu, Dropdown, Button, message, Space, Tooltip } from 'antd';
 import { DownOutlined, UserOutlined } from '@ant-design/icons';
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
+import NavBar from "./NavBar";
 
 
 const animatedComponents = makeAnimated();
@@ -33,14 +34,19 @@ const weeks = [
 ]
 
 
-const MainForm = () => {
+const MainForm = (props) => {
 
-    const [showLoading, setShowLoading] = React.useState(false);
-    const [orgUnits, setOrgUnits] = React.useState([]);
-    const [searchValue, setSearchValue] = React.useState([]);
-    const [variable, setVariable] = React.useState([]);
-    const [selectedOption, setSelected] = React.useState(null);
+    const [showLoading, setShowLoading] = useState(false);
+    const [orgUnits, setOrgUnits] = useState([]);
+    const [programs, setPrograms] = useState([]);
+    const [searchValue, setSearchValue] = useState([]);
+    const [variable, setVariable] = useState([]);
+    const [selectedOption, setSelected] = useState(null);
 
+    useEffect(() => {
+       setOrgUnits(props.organizationalUnits);
+       setPrograms(props.programs);
+    });
 
     const handle = (value, label, extra) => {
         setSearchValue(value)
@@ -58,6 +64,7 @@ const MainForm = () => {
 
     return (
         <div>
+            <NavBar/>
             <MDBBox display="flex" justifyContent="center" >
                 <MDBCol className="mb-5" md="10">
                     <MDBCard display="flex" justifyContent="center" className="text-xl-center w-100">
@@ -80,9 +87,8 @@ const MainForm = () => {
                                             </label>
                                             <Select
                                                 className="mt-2"
-                                                components={animatedComponents}
                                                 onChange={handleChange}
-                                                options={weeks}
+                                                options={programs}
                                             />
                                         </div>
                                     </MDBCol>
