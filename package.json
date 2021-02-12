@@ -9,11 +9,13 @@
     "@testing-library/user-event": "^12.7.0",
     "antd": "^4.12.3",
     "bootstrap": "^4.6.0",
+    "d2": "^31.9.0",
     "mdbreact": "^5.0.1",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.3",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.2",
+    "react-select": "^4.1.0",
     "web-vitals": "^1.1.0"
   },
   "scripts": {

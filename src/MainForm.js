@@ -1,6 +1,7 @@
 import React from "react";
 import {MDBContainer, MDBRow, MDBIcon} from "mdbreact";
 import { MDBDropdown, MDBDropdownToggle, MDBDropdownMenu, MDBDropdownItem } from "mdbreact";
+import {DatePicker, TreeSelect} from "antd";
 import {
     MDBBox,
     MDBBtn,
@@ -13,12 +14,46 @@ import {
 } from "mdbreact";
 import { Menu, Dropdown, Button, message, Space, Tooltip } from 'antd';
 import { DownOutlined, UserOutlined } from '@ant-design/icons';
+import Select from 'react-select'
+import makeAnimated from 'react-select/animated';
 
+
+const animatedComponents = makeAnimated();
+const options = [
+    { value: 'chocolate', label: 'Chocolate' },
+    { value: 'strawberry', label: 'Strawberry' },
+    { value: 'vanilla', label: 'Vanilla' }
+]
+
+const weeks = [
+    { value: 'week 1', label: 'Week 1' },
+    { value: 'week 2', label: 'Week 2' },
+    { value: 'week 3', label: 'Week 3' },
+    { value: 'week 4', label: 'Week 4' },
+]
 
 
 const MainForm = () => {
 
     const [showLoading, setShowLoading] = React.useState(false);
+    const [orgUnits, setOrgUnits] = React.useState([]);
+    const [searchValue, setSearchValue] = React.useState([]);
+    const [variable, setVariable] = React.useState([]);
+    const [selectedOption, setSelected] = React.useState(null);
+
+
+    const handle = (value, label, extra) => {
+        setSearchValue(value)
+    };
+
+    const onSelect = (value, node) => {
+        setVariable(variable => [...variable, node]);
+    };
+
+    const handleChange = selectedOption => {
+        setSelected(selectedOption)
+        console.log(`Option selected:`, selectedOption);
+    };
 
 
     return (
@@ -41,21 +76,14 @@ const MainForm = () => {
                                     <MDBCol md="4">
                                         <div className="text-left my-3">
                                             <label className="grey-text ml-2">
-                                                <strong>Select Event Program</strong>
+                                                <strong>Select Tracker Program</strong>
                                             </label>
-                                            <MDBDropdown className=" myDropDown">
-                                                <MDBDropdownToggle caret color="primary">
-                                                    <input className="form-control myDropDown"
-                                                           type="text"
-                                                           placeholder="search available reports"
-                                                           aria-label="Search" />
-                                                </MDBDropdownToggle>
-                                                <MDBDropdownMenu className="dropdown-menu myDrop"  basic >
-                                                    <MDBDropdownItem >
-                                                        something
-                                                    </MDBDropdownItem>
-                                                </MDBDropdownMenu>
-                                            </MDBDropdown>
+                                            <Select
+                                                className="mt-2"
+                                                components={animatedComponents}
+                                                onChange={handleChange}
+                                                options={weeks}
+                                            />
                                         </div>
                                     </MDBCol>
 
@@ -64,39 +92,66 @@ const MainForm = () => {
                                             <label className="grey-text ml-2">
                                                 <strong>Select Month</strong>
                                             </label>
-                                            <MDBDropdown className=" myDropDown">
-                                                <MDBDropdownToggle caret color="primary">
-                                                    <input className="form-control myDropDown"
-                                                           type="text"
-                                                           placeholder="search available reports"
-                                                           aria-label="Search" />
-                                                </MDBDropdownToggle>
-                                                <MDBDropdownMenu className="dropdown-menu myDrop"  basic >
-                                                    <MDBDropdownItem >
-                                                        something
-                                                    </MDBDropdownItem>
-                                                </MDBDropdownMenu>
-                                            </MDBDropdown>
+                                            <Select
+                                                className="mt-2"
+                                                isMulti
+                                                components={animatedComponents}
+                                                onChange={handleChange}
+                                                options={weeks}
+                                            />
                                         </div>
                                     </MDBCol>
                                     <MDBCol md="4">
                                         <div className="text-left my-3">
                                             <label className="grey-text ml-2">
-                                                <strong>Select Something else</strong>
+                                                <strong>Select Preferred Weeks</strong>
                                             </label>
-                                            <MDBDropdown className=" myDropDown">
-                                                <MDBDropdownToggle caret color="primary">
-                                                    <input className="form-control myDropDown"
-                                                           type="text"
-                                                           placeholder="search available reports"
-                                                           aria-label="Search" />
-                                                </MDBDropdownToggle>
-                                                <MDBDropdownMenu className="dropdown-menu myDrop"  basic >
-                                                    <MDBDropdownItem >
-                                                        something
-                                                    </MDBDropdownItem>
-                                                </MDBDropdownMenu>
-                                            </MDBDropdown>
+                                            <Select
+                                                className="mt-2"
+                                                components={animatedComponents}
+                                                onChange={handleChange}
+                                                options={weeks}
+                                            />
+                                        </div>
+                                    </MDBCol>
+                                </MDBRow>
+
+                                <MDBRow className="mt-4">
+                                    <MDBCol md="4">
+
+                                        <div className="text-left my-3">
+                                            <label className="grey-text ml-2">
+                                                <strong>Select Organization Unit</strong>
+                                            </label>
+
+                                            <TreeSelect
+                                                style={{ width: '100%' }}
+                                                value={searchValue}
+                                                className="mt-2"
+                                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                                treeData={orgUnits}
+                                                allowClear
+                                                size="large"
+                                                multiple
+                                                placeholder="Please select organizational unit"
+                                                onChange={handle}
+                                                onSelect={onSelect}
+                                            />
+
+                                        </div>
+                                    </MDBCol>
+                                    <MDBCol md="4">
+                                        <div className="text-left my-3">
+                                            <label className="grey-text ml-2">
+                                                <strong>Select Market Commodity</strong>
+                                            </label>
+                                            <Select
+                                                className="mt-2"
+                                                isMulti
+                                                closeMenuOnSelect={false}
+                                                components={animatedComponents}
+                                                options={options}
+                                            />
                                         </div>
                                     </MDBCol>
                                 </MDBRow>
