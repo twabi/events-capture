@@ -35,8 +35,8 @@ const MainForm = (props) => {
     const [selectedOrgUnit, setOrgUnit] = useState([]);
     const [selectedProgram, setSelectedProgram] = useState(null);
     const [events, setEvents] = useState(null);
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
 
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
@@ -89,6 +89,11 @@ const MainForm = (props) => {
 
     const test = () => {
         console.log(startDate);
+        var another = "2021-02-12T19:32:18";
+        var date = moment(another);
+        var start = moment(startDate);
+        var end = moment(endDate);
+        console.log(date.isBetween(start, end));
 
     }
 
