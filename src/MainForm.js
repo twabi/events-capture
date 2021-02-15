@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {MDBContainer, MDBRow} from "mdbreact";
 import {TreeSelect} from "antd";
+import { DatePicker, Space } from 'antd';
 import {
     MDBBox,
     MDBBtn,
@@ -17,7 +18,7 @@ import {getInstance} from "d2";
 
 
 const animatedComponents = makeAnimated();
-
+const { RangePicker } = DatePicker;
 const weeks = [
     { value: 'week-1', label: 'Week 1' },
     { value: 'week-2', label: 'Week 2' },
@@ -33,6 +34,14 @@ const months = [
     { value: '12', label: 'December' },
 ]
 
+const years = [
+    { value: '2021', label: '2021' },
+    { value: '2020', label: '2020' },
+    { value: '2019', label: '2019' },
+    { value: '2018', label: '2018' },
+]
+
+var moment = require("moment");
 
 const MainForm = (props) => {
 
@@ -47,6 +56,39 @@ const MainForm = (props) => {
     const [selectedWeek, setSelectedWeek] = useState(null);
     const [selectedInstance, setSelectedInstance] = useState(null);
     const [events, setEvents] = useState(null);
+    const [selectedYear, setSelectedYear] = useState(null);
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+
+    const [dates, setDates] = useState([]);
+    const [hackValue, setHackValue] = useState();
+    const [value, setValue] = useState();
+    const disabledDate = current => {
+        if (!dates || dates.length === 0) {
+            return false;
+        }
+        const tooLate = dates[0] && current.diff(dates[0], 'days') > 7;
+        const tooEarly = dates[1] && dates[1].diff(current, 'days') > 7;
+        return tooEarly || tooLate;
+    };
+
+    const onOpenChange = open => {
+        if (open) {
+            setHackValue([]);
+            setDates([]);
+        } else {
+            setHackValue(undefined);
+        }
+    };
+
+    const handleDateChange = (selectedValue) => {
+        setValue(selectedValue);
+        const valueOfInput1 = selectedValue[0].format().split("+");
+        const valueOfInput2 = selectedValue[1].format().split("+");
+
+        setStartDate(valueOfInput1[0])
+        setEndDate(valueOfInput2[0])
+    }
 
     useEffect(() => {
        setOrgUnits(props.organizationalUnits);
@@ -94,6 +136,15 @@ const MainForm = (props) => {
         console.log(selectedOption)
     };
 
+    const handleYear = selectedOption => {
+        setSelectedYear(selectedOption);
+    }
+
+    const test = () => {
+        console.log(startDate);
+
+    }
+
     const handleLoadEvents = () => {
 
         console.log(selectedOrgUnit);
@@ -115,6 +166,12 @@ const MainForm = (props) => {
                 .then((response) => {
                     console.log(response.events);
                     setEvents(response.events);
+                    response.events.map((item) => {
+                        var day = moment(item.eventDate);
+                        console.log(day.month(), day.date());
+                        console.log(day)
+                    })
+
                 })
                 .catch((err) => {
                     console.log(err);
@@ -158,37 +215,6 @@ const MainForm = (props) => {
                                             />
                                         </div>
                                     </MDBCol>
-
-                                    <MDBCol md="4">
-                                        <div className="text-left my-3">
-                                            <label className="grey-text ml-2">
-                                                <strong>Select Month</strong>
-                                            </label>
-                                            <Select
-                                                className="mt-2"
-                                                isMulti
-                                                components={animatedComponents}
-                                                onChange={handleMonth}
-                                                options={months}
-                                            />
-                                        </div>
-                                    </MDBCol>
-                                    <MDBCol md="4">
-                                        <div className="text-left my-3">
-                                            <label className="grey-text ml-2">
-                                                <strong>Select Preferred Weeks</strong>
-                                            </label>
-                                            <Select
-                                                className="mt-2"
-                                                components={animatedComponents}
-                                                onChange={handleWeek}
-                                                options={weeks}
-                                            />
-                                        </div>
-                                    </MDBCol>
-                                </MDBRow>
-
-                                <MDBRow className="mt-4">
                                     <MDBCol md="4">
 
                                         <div className="text-left my-3">
@@ -212,12 +238,36 @@ const MainForm = (props) => {
 
                                         </div>
                                     </MDBCol>
+                                    <MDBCol md="4">
+                                        <div className="text-left my-3">
+                                            <label className="grey-text ml-2">
+                                                <strong>Select Start & End Date</strong>
+                                            </label>
+                                            <Space direction="vertical" size={12}>
+                                                <RangePicker
+                                                    className="mt-2"
+                                                    style={{ width: '100%' }}
+                                                    value={hackValue || value}
+                                                    disabledDate={disabledDate}
+                                                    size="large"
+                                                    onCalendarChange={val => setDates(val)}
+                                                    onChange={handleDateChange}
+                                                    onOpenChange={onOpenChange}
+                                                />
+                                            </Space>
+
+                                        </div>
+                                    </MDBCol>
+                                </MDBRow>
+
+                                <MDBRow className="mt-4">
+
                                 </MDBRow>
 
                             </MDBContainer>
 
                             <div className="text-center py-4 mt-2">
-                                <MDBBtn color="cyan" className="text-white" onClick={handleLoadEvents}>
+                                <MDBBtn color="cyan" className="text-white" onClick={test}>
                                     Show Events {showLoading ? <div className="spinner-border mx-2 text-white spinner-border-sm" role="status">
                                     <span className="sr-only">Loading...</span>
                                 </div> : null}
