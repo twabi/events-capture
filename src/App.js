@@ -30,7 +30,8 @@ function App() {
                         tempArray.push({"id" : item.id, "label" : item.displayName})
                     });
                     setPrograms(tempArray);
-            }).catch((error) => {
+                })
+                .catch((error) => {
                 console.log(error);
             })
 
@@ -61,7 +62,8 @@ function App() {
                     console.log(tree);
                     setOrgUnits(tree)
 
-                }).catch((error) => {
+                })
+                .catch((error) => {
                     console.log(error);
             });
         })

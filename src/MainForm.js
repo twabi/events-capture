@@ -17,17 +17,12 @@ import {getInstance} from "d2";
 
 
 const animatedComponents = makeAnimated();
-const options = [
-    { value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' }
-]
 
 const weeks = [
-    { value: 'week 1', label: 'Week 1' },
-    { value: 'week 2', label: 'Week 2' },
-    { value: 'week 3', label: 'Week 3' },
-    { value: 'week 4', label: 'Week 4' },
+    { value: 'week-1', label: 'Week 1' },
+    { value: 'week-2', label: 'Week 2' },
+    { value: 'week-3', label: 'Week 3' },
+    { value: 'week-4', label: 'Week 4' },
 ]
 
 const months = [
@@ -47,11 +42,11 @@ const MainForm = (props) => {
     const [searchValue, setSearchValue] = useState([]);
     const [instances, setInstances] = useState([]);
     const [selectedOrgUnit, setOrgUnit] = useState([]);
-    const [selectedOption, setSelected] = useState(null);
     const [selectedMonth, setSelectedMonth] = useState(null);
     const [selectedProgram, setSelectedProgram] = useState(null);
-    const [selectedWeek, setSelectedWeek] = React.useState(null);
+    const [selectedWeek, setSelectedWeek] = useState(null);
     const [selectedInstance, setSelectedInstance] = useState(null);
+    const [events, setEvents] = useState(null);
 
     useEffect(() => {
        setOrgUnits(props.organizationalUnits);
@@ -66,45 +61,66 @@ const MainForm = (props) => {
     const onSelect = (value, node) => {
         setOrgUnit(selectedOrgUnit => [...selectedOrgUnit, node]);
         console.log(node);
+        /*
         var id = "edb4aTWzQaZ"
         getInstance().then((d2) => {
             const endpoint = `trackedEntityInstances.json?paging=false&ou=${id}`
             d2.Api.getApi().get(endpoint)
                 .then((response) => {
                     console.log(response.trackedEntityInstances)
-                    //setInstances(response.trackedEntityInstances);
 
                     const tempArray = []
                     response.trackedEntityInstances.map((item, index) => {
-                        tempArray.push({"id" : item.id, "label" : item.displayName})
+                        tempArray.push({"id" : item.trackedEntityInstance, "label" : item.trackedEntityInstance})
                     });
                     setInstances(tempArray);
-                }).catch((error) => {
+                })
+                .catch((error) => {
                     console.log("error: " + error);
             })
         });
-    };
-
-    const handleChange = selectedOption => {
-        setSelected(selectedOption)
-        console.log(`Option selected:`, selectedOption);
+         */
     };
 
     const handleProgram = selectedOption => {
-        setSelectedProgram(selectedOption)
+        setSelectedProgram(selectedOption);
     };
     const handleWeek = selectedOption => {
-        setSelectedWeek(selectedOption)
+        setSelectedWeek(selectedOption);
     };
 
     const handleMonth = selectedOption => {
-        setSelectedMonth(selectedOption)
+        setSelectedMonth(selectedOption);
+        console.log(selectedOption)
     };
 
-    const handleInstaces = selectedOption =>{
-        setSelectedInstance(selectedOption)
-    }
+    const handleLoadEvents = () => {
 
+        console.log(selectedOrgUnit);
+        console.log(selectedWeek.value);
+        console.log(selectedProgram);
+        console.log(selectedMonth);
+
+        var week = selectedWeek.value;
+        var month = selectedMonth[0].value;
+        var progID = selectedProgram.id;
+        var orgID = selectedOrgUnit[0].id;
+        //var trackedID = selectedInstance[0].id;
+        console.log(week, month, progID, orgID);
+
+        var id = "edb4aTWzQaZ"
+        getInstance().then((d2) => {
+            const endpoint = `events.json?orgUnit=${id}&program=${progID}`
+            d2.Api.getApi().get(endpoint)
+                .then((response) => {
+                    console.log(response.events);
+                    setEvents(response.events);
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+        });
+    };
 
 
     return (
@@ -196,26 +212,12 @@ const MainForm = (props) => {
 
                                         </div>
                                     </MDBCol>
-                                    <MDBCol md="4">
-                                        <div className="text-left my-3">
-                                            <label className="grey-text ml-2">
-                                                <strong>Select Tracked Entity Instances of the Org Unit</strong>
-                                            </label>
-                                            <Select
-                                                className="mt-2"
-                                                isMulti
-                                                closeMenuOnSelect={false}
-                                                components={animatedComponents}
-                                                options={instances}
-                                            />
-                                        </div>
-                                    </MDBCol>
                                 </MDBRow>
 
                             </MDBContainer>
 
                             <div className="text-center py-4 mt-2">
-                                <MDBBtn color="cyan" className="text-white">
+                                <MDBBtn color="cyan" className="text-white" onClick={handleLoadEvents}>
                                     Show Events {showLoading ? <div className="spinner-border mx-2 text-white spinner-border-sm" role="status">
                                     <span className="sr-only">Loading...</span>
                                 </div> : null}
