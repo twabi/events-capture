@@ -1,22 +1,19 @@
 import React, { useEffect, useState } from "react";
-import {MDBContainer, MDBRow, MDBIcon} from "mdbreact";
-import { MDBDropdown, MDBDropdownToggle, MDBDropdownMenu, MDBDropdownItem } from "mdbreact";
-import {DatePicker, TreeSelect} from "antd";
+import {MDBContainer, MDBRow} from "mdbreact";
+import {TreeSelect} from "antd";
 import {
     MDBBox,
     MDBBtn,
     MDBCard,
     MDBCardBody,
-    MDBCardHeader,
     MDBCardText,
     MDBCardTitle,
     MDBCol
 } from "mdbreact";
-import { Menu, Dropdown, Button, message, Space, Tooltip } from 'antd';
-import { DownOutlined, UserOutlined } from '@ant-design/icons';
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import NavBar from "./NavBar";
+import {getInstance} from "d2";
 
 
 const animatedComponents = makeAnimated();
@@ -48,26 +45,66 @@ const MainForm = (props) => {
     const [orgUnits, setOrgUnits] = useState([]);
     const [programs, setPrograms] = useState([]);
     const [searchValue, setSearchValue] = useState([]);
-    const [variable, setVariable] = useState([]);
+    const [instances, setInstances] = useState([]);
+    const [selectedOrgUnit, setOrgUnit] = useState([]);
     const [selectedOption, setSelected] = useState(null);
+    const [selectedMonth, setSelectedMonth] = useState(null);
+    const [selectedProgram, setSelectedProgram] = useState(null);
+    const [selectedWeek, setSelectedWeek] = React.useState(null);
+    const [selectedInstance, setSelectedInstance] = useState(null);
 
     useEffect(() => {
        setOrgUnits(props.organizationalUnits);
        setPrograms(props.programs);
-    });
+    },[props.organizationalUnits, props.programs]);
+
 
     const handle = (value, label, extra) => {
         setSearchValue(value)
     };
 
     const onSelect = (value, node) => {
-        setVariable(variable => [...variable, node]);
+        setOrgUnit(selectedOrgUnit => [...selectedOrgUnit, node]);
+        console.log(node);
+        var id = "edb4aTWzQaZ"
+        getInstance().then((d2) => {
+            const endpoint = `trackedEntityInstances.json?paging=false&ou=${id}`
+            d2.Api.getApi().get(endpoint)
+                .then((response) => {
+                    console.log(response.trackedEntityInstances)
+                    //setInstances(response.trackedEntityInstances);
+
+                    const tempArray = []
+                    response.trackedEntityInstances.map((item, index) => {
+                        tempArray.push({"id" : item.id, "label" : item.displayName})
+                    });
+                    setInstances(tempArray);
+                }).catch((error) => {
+                    console.log("error: " + error);
+            })
+        });
     };
 
     const handleChange = selectedOption => {
         setSelected(selectedOption)
         console.log(`Option selected:`, selectedOption);
     };
+
+    const handleProgram = selectedOption => {
+        setSelectedProgram(selectedOption)
+    };
+    const handleWeek = selectedOption => {
+        setSelectedWeek(selectedOption)
+    };
+
+    const handleMonth = selectedOption => {
+        setSelectedMonth(selectedOption)
+    };
+
+    const handleInstaces = selectedOption =>{
+        setSelectedInstance(selectedOption)
+    }
+
 
 
     return (
@@ -96,11 +133,11 @@ const MainForm = (props) => {
                                     <MDBCol md="4">
                                         <div className="text-left my-3">
                                             <label className="grey-text ml-2">
-                                                <strong>Select Tracker Program</strong>
+                                                <strong>Select Program</strong>
                                             </label>
                                             <Select
                                                 className="mt-2"
-                                                onChange={handleChange}
+                                                onChange={handleProgram}
                                                 options={programs}
                                             />
                                         </div>
@@ -115,7 +152,7 @@ const MainForm = (props) => {
                                                 className="mt-2"
                                                 isMulti
                                                 components={animatedComponents}
-                                                onChange={handleChange}
+                                                onChange={handleMonth}
                                                 options={months}
                                             />
                                         </div>
@@ -128,7 +165,7 @@ const MainForm = (props) => {
                                             <Select
                                                 className="mt-2"
                                                 components={animatedComponents}
-                                                onChange={handleChange}
+                                                onChange={handleWeek}
                                                 options={weeks}
                                             />
                                         </div>
@@ -162,14 +199,14 @@ const MainForm = (props) => {
                                     <MDBCol md="4">
                                         <div className="text-left my-3">
                                             <label className="grey-text ml-2">
-                                                <strong>Select Market Commodity</strong>
+                                                <strong>Select Tracked Entity Instances of the Org Unit</strong>
                                             </label>
                                             <Select
                                                 className="mt-2"
                                                 isMulti
                                                 closeMenuOnSelect={false}
                                                 components={animatedComponents}
-                                                options={options}
+                                                options={instances}
                                             />
                                         </div>
                                     </MDBCol>

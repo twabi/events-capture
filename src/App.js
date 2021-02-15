@@ -28,9 +28,8 @@ function App() {
                     const tempArray = []
                     response.programs.map((item, index) => {
                         tempArray.push({"id" : item.id, "label" : item.displayName})
-                    })
-
-                    setPrograms(tempArray)
+                    });
+                    setPrograms(tempArray);
             }).catch((error) => {
                 console.log(error);
             })
