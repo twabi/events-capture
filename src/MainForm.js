@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {MDBCardFooter, MDBContainer, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
-import {TreeSelect} from "antd";
-import { DatePicker, Space } from 'antd';
+import {TreeSelect,DatePicker, Space } from "antd";
 import {
     MDBBox,
     MDBBtn,
@@ -11,12 +10,12 @@ import {
     MDBCardTitle,
     MDBCol
 } from "mdbreact";
-import Select from 'react-select'
+import Select from "react-select";
 import NavBar from "./NavBar";
 import {getInstance} from "d2";
-import * as jsPDF from "jspdf";
+import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-
+import "jspdf-autotable";
 
 const { RangePicker } = DatePicker;
 const weeks = [
@@ -42,6 +41,7 @@ const MainForm = (props) => {
     const [endDate, setEndDate] = useState("");
     const [showMenu, setShowMenu] = useState(true);
     const [showPrintLoading, setShowPrintLoading] = useState(false);
+    const [showCSVLoading, setShowCSV] = useState(false);
 
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
@@ -178,7 +178,7 @@ const MainForm = (props) => {
                                 </MDBCardHeader>
 
                                 <MDBCardBody  >
-                                    <MDBTable bordered>
+                                    <MDBTable id="tableDiv" striped bordered responsive className="border-dark border">
                                         <MDBTableHead color="primary-color" textWhite>
                                             <tr>
                                                 <th>Org Unit</th>
@@ -201,13 +201,13 @@ const MainForm = (props) => {
                                     </MDBTable>
                                 </MDBCardBody>
                                 <MDBCardFooter className="d-flex justify-content-center ">
-                                    <MDBBtn color="cyan" className="text-white">
+                                    <MDBBtn color="cyan" className="text-white" onClick={()=>{exportPDF("Events Table")}}>
                                         Print PDF {showPrintLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
                                         <span className="sr-only">Loading...</span>
                                     </div> : null}
                                     </MDBBtn>
                                     <MDBBtn color="cyan" className="text-white">
-                                        Print CSV {showPrintLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
+                                        Print CSV {showCSVLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
                                         <span className="sr-only">Loading...</span>
                                     </div> : null}
                                     </MDBBtn>
