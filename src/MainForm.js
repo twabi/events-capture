@@ -40,6 +40,7 @@ const MainForm = (props) => {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [showMenu, setShowMenu] = useState(true);
+    const [showPrintLoading, setShowPrintLoading] = useState(false);
 
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
@@ -104,6 +105,7 @@ const MainForm = (props) => {
         console.log(selectedOrgUnit);
         console.log(selectedProgram);
 
+        setShowLoading(true);
         var start = moment(startDate);
         var end = moment(endDate);
         var progID = selectedProgram.id;
@@ -134,6 +136,7 @@ const MainForm = (props) => {
                 }).then(() => {
                     setShowMenu(false);
                     setShowEvents(true);
+                    setShowLoading(false);
             })
                 .catch((err) => {
                     console.log(err);
@@ -158,45 +161,36 @@ const MainForm = (props) => {
                                 </MDBCardHeader>
 
                                 <MDBCardBody  >
-                                    <MDBTable>
+                                    <MDBTable bordered>
                                         <MDBTableHead color="primary-color" textWhite>
                                             <tr>
-                                                <th>#</th>
-                                                <th>First</th>
-                                                <th>Last</th>
-                                                <th>Handle</th>
+                                                <th>Org Unit</th>
+                                                <th>Date</th>
+                                                <th>Tracked-Instance</th>
+                                                <th>Stored By</th>
                                             </tr>
                                         </MDBTableHead>
                                         <MDBTableBody>
-                                            <tr>
-                                                <td>1</td>
-                                                <td>Mark</td>
-                                                <td>Otto</td>
-                                                <td>@mdo</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2</td>
-                                                <td>Jacob</td>
-                                                <td>Thornton</td>
-                                                <td>@fat</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3</td>
-                                                <td>Larry</td>
-                                                <td>the Bird</td>
-                                                <td>@twitter</td>
-                                            </tr>
+                                            {eventsArray.map((eventItem, index) => (
+                                                <tr key={index}>
+                                                    { index==0 && <td rowSpan={eventsArray.length}>{eventItem.orgUnitName}</td>}
+                                                    <td>{eventItem.eventDate}</td>
+                                                    <td>{eventItem.trackedEntityInstance}</td>
+                                                    <td>{eventItem.storedBy}</td>
+                                                </tr>
+                                            ))}
+
                                         </MDBTableBody>
                                     </MDBTable>
                                 </MDBCardBody>
                                 <MDBCardFooter className="d-flex justify-content-center ">
                                     <MDBBtn color="cyan" className="text-white">
-                                        Print PDF {showLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
+                                        Print PDF {showPrintLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
                                         <span className="sr-only">Loading...</span>
                                     </div> : null}
                                     </MDBBtn>
                                     <MDBBtn color="cyan" className="text-white">
-                                        Print CSV {showLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
+                                        Print CSV {showPrintLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
                                         <span className="sr-only">Loading...</span>
                                     </div> : null}
                                     </MDBBtn>
