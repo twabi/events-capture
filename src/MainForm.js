@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {MDBCardFooter, MDBContainer, MDBFooter, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
+import {MDBCardFooter, MDBContainer, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
 import {TreeSelect} from "antd";
 import { DatePicker, Space } from 'antd';
-import Grid from "@material-ui/core/Grid";
 import {
     MDBBox,
     MDBBtn,
@@ -15,6 +14,8 @@ import {
 import Select from 'react-select'
 import NavBar from "./NavBar";
 import {getInstance} from "d2";
+import * as jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 
 const { RangePicker } = DatePicker;
@@ -147,6 +148,22 @@ const MainForm = (props) => {
     const handleBackButton = () => {
         setShowMenu(true);
         setShowEvents(false);
+    }
+
+    //the functions that prints the table to pdf format
+    const exportPDF = (title) => {
+        setShowPrintLoading(true);
+        const input = document.getElementById('tableDiv');
+        html2canvas(input)
+            .then((canvas) => {
+                const pdf = new jsPDF();
+                pdf.setFontSize(25);
+                pdf.autoTable({startY: 20, html: '#tableDiv'});
+                pdf.text(title, 50, 15);
+                pdf.save(title + ".pdf");
+            }).then(() => {
+            setShowPrintLoading(false);
+        });
     }
 
     const EventsTable = (eventsArray) => {
