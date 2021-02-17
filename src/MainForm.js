@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {MDBContainer, MDBRow} from "mdbreact";
+import {MDBCardFooter, MDBContainer, MDBFooter, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
 import {TreeSelect} from "antd";
 import { DatePicker, Space } from 'antd';
+import Grid from "@material-ui/core/Grid";
 import {
     MDBBox,
     MDBBtn,
-    MDBCard,
+    MDBCard, MDBCardHeader,
     MDBCardBody,
     MDBCardText,
     MDBCardTitle,
@@ -29,6 +30,7 @@ var moment = require("moment");
 const MainForm = (props) => {
 
     const [showLoading, setShowLoading] = useState(false);
+    const [showEvents, setShowEvents] = useState(false);
     const [orgUnits, setOrgUnits] = useState([]);
     const [programs, setPrograms] = useState([]);
     const [searchValue, setSearchValue] = useState([]);
@@ -37,6 +39,7 @@ const MainForm = (props) => {
     const [events, setEvents] = useState(null);
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
+    const [showMenu, setShowMenu] = useState(true);
 
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
@@ -94,7 +97,6 @@ const MainForm = (props) => {
         var start = moment(startDate);
         var end = moment(endDate);
         console.log(date.isBetween(start, end));
-
     }
 
     const handleLoadEvents = () => {
@@ -102,6 +104,8 @@ const MainForm = (props) => {
         console.log(selectedOrgUnit);
         console.log(selectedProgram);
 
+        var start = moment(startDate);
+        var end = moment(endDate);
         var progID = selectedProgram.id;
         var orgID = selectedOrgUnit[0].id;
         //var trackedID = selectedInstance[0].id;
@@ -112,25 +116,105 @@ const MainForm = (props) => {
             const endpoint = `events.json?orgUnit=${id}&program=${progID}`
             d2.Api.getApi().get(endpoint)
                 .then((response) => {
-                    console.log(response.events);
-                    setEvents(response.events);
-                    response.events.map((item) => {
-                        var day = moment(item.eventDate);
-                        console.log(day.month(), day.date());
-                        console.log(day)
-                    })
 
-                })
+                    var tempArray = []
+                    response.events.map((item) => {
+                        var date = moment(item.eventDate);
+                        console.log(item)
+                        console.log(date.month(), date.date());
+                        //console.log(day)
+                        if(date.isBetween(start, end)){
+                            tempArray.push(item);
+                        }
+                    });
+
+                    setEvents(tempArray);
+                    console.log(tempArray);
+
+                }).then(() => {
+                    setShowMenu(false);
+                    setShowEvents(true);
+            })
                 .catch((err) => {
                     console.log(err);
                 })
         });
     };
 
+    const handleBackButton = () => {
+        setShowMenu(true);
+        setShowEvents(false);
+    }
+
+    const EventsTable = (eventsArray) => {
+        if(eventsArray !== null && eventsArray.length !== 0){
+            return (
+                <div>
+                    <MDBBox  display="flex" justifyContent="center" className="mt-2" >
+                        <MDBCol className="mb-5" md="11">
+                            <MDBCard  className="ml-4">
+                                <MDBCardHeader tag="h5" className="text-center font-weight-bold text-uppercase py-4">
+                                    Events for said program
+                                </MDBCardHeader>
+
+                                <MDBCardBody  >
+                                    <MDBTable>
+                                        <MDBTableHead color="primary-color" textWhite>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>First</th>
+                                                <th>Last</th>
+                                                <th>Handle</th>
+                                            </tr>
+                                        </MDBTableHead>
+                                        <MDBTableBody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>Mark</td>
+                                                <td>Otto</td>
+                                                <td>@mdo</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>Jacob</td>
+                                                <td>Thornton</td>
+                                                <td>@fat</td>
+                                            </tr>
+                                            <tr>
+                                                <td>3</td>
+                                                <td>Larry</td>
+                                                <td>the Bird</td>
+                                                <td>@twitter</td>
+                                            </tr>
+                                        </MDBTableBody>
+                                    </MDBTable>
+                                </MDBCardBody>
+                                <MDBCardFooter className="d-flex justify-content-center ">
+                                    <MDBBtn color="cyan" className="text-white">
+                                        Print PDF {showLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
+                                        <span className="sr-only">Loading...</span>
+                                    </div> : null}
+                                    </MDBBtn>
+                                    <MDBBtn color="cyan" className="text-white">
+                                        Print CSV {showLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
+                                        <span className="sr-only">Loading...</span>
+                                    </div> : null}
+                                    </MDBBtn>
+                                </MDBCardFooter>
+                            </MDBCard>
+                        </MDBCol>
+                    </MDBBox>
+
+                </div>
+            );
+    }
+    }
+
 
     return (
         <div>
             <NavBar/>
+            {showMenu ?
             <MDBBox display="flex" justifyContent="center" >
                 <MDBCol className="mb-5" md="10">
                     <MDBCard display="flex" justifyContent="center" className="text-xl-center w-100">
@@ -215,7 +299,7 @@ const MainForm = (props) => {
                             </MDBContainer>
 
                             <div className="text-center py-4 mt-2">
-                                <MDBBtn color="cyan" className="text-white" onClick={test}>
+                                <MDBBtn color="cyan" className="text-white" onClick={handleLoadEvents}>
                                     Show Events {showLoading ? <div className="spinner-border mx-2 text-white spinner-border-sm" role="status">
                                     <span className="sr-only">Loading...</span>
                                 </div> : null}
@@ -225,8 +309,25 @@ const MainForm = (props) => {
                         </MDBCardBody>
                     </MDBCard>
                 </MDBCol>
-            </MDBBox>
-
+            </MDBBox>: null}
+            { showEvents ?
+                <MDBContainer>
+                    <MDBRow>
+                        <MDBCol>
+                            <MDBBtn color="cyan"
+                                    onClick={handleBackButton}
+                                    className="text-white float-lg-left mr-2" type="submit">
+                                Back
+                            </MDBBtn>
+                        </MDBCol>
+                    </MDBRow>
+                    <MDBRow>
+                        <MDBCol>
+                            {EventsTable(events)}
+                        </MDBCol>
+                    </MDBRow>
+                </MDBContainer>
+                 : null }
         </div>
     )
 }
