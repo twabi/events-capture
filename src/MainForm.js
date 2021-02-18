@@ -37,6 +37,7 @@ const MainForm = (props) => {
     const [showMenu, setShowMenu] = useState(true);
     const [showPrintLoading, setShowPrintLoading] = useState(false);
     const [showCSVLoading, setShowCSV] = useState(false);
+    const [number, setNumber] = useState(3);
 
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
@@ -96,6 +97,33 @@ const MainForm = (props) => {
         console.log(date.isBetween(start, end));
     }
 
+    const functionWithPromise = eventItem => { //a function that returns a promise
+        getInstance().then((d2) => {
+            eventItem.dataValues.map((dataValue) =>{
+                const endpoint = `dataElements/${dataValue.dataElement}.json`;
+                d2.Api.getApi().get(endpoint)
+                    .then((response) => {
+                        console.log(response.displayName);
+                        dataValue.displayName = response.displayName;
+                    })
+                    .catch((error) => {
+                        console.log("An error occurred: " + error);
+                        alert("An error occurred: " + error);
+                    });
+            });
+        });
+
+        return eventItem;
+    }
+
+    const anAsyncFunction = async item => {
+        return functionWithPromise(item)
+    }
+
+    const getData = async (list) => {
+        return Promise.all(list.map(item => anAsyncFunction(item)))
+    }
+
     const handleLoadEvents = () => {
 
         console.log(selectedOrgUnit);
@@ -110,7 +138,7 @@ const MainForm = (props) => {
         console.log( progID, orgID);
 
         //var id = "edb4aTWzQaZ";
-        var id = "kNaWeQScFWJ";
+        var id = "C3RoODpOTz5";
         getInstance().then((d2) => {
             const endpoint = `events.json?orgUnit=${id}&program=${progID}`
             d2.Api.getApi().get(endpoint)
@@ -120,25 +148,36 @@ const MainForm = (props) => {
                     response.events.map((item) => {
                         var date = moment(item.eventDate);
                         console.log(item)
-                        console.log(date.month(), date.date());
+                        //console.log(date.month(), date.date());
                         //console.log(day)
                         if(date.isBetween(start, end)){
                             tempArray.push(item);
                         }
                     });
 
-                    setEvents(tempArray);
-                    console.log(tempArray);
+                    //setEvents(tempArray);
 
+
+
+                    //console.log(tempArray);
+
+            }).then(() => {
+                getData(events).then((data) => {
+                    console.log(data)
+                    setEvents(data);
                 }).then(() => {
+
                     setShowMenu(false);
                     setShowEvents(true);
                     setShowLoading(false);
+                });
             })
                 .catch((err) => {
-                    console.log(err);
+                    console.log("An error occurred: " + err);
+                    alert("An error occurred: " + err);
                 })
-        });
+        })
+
     };
 
     const handleBackButton = () => {
@@ -166,9 +205,12 @@ const MainForm = (props) => {
     const exportPDF = (title) => {
         setShowPrintLoading(true);
         const input = document.getElementById('tableDiv');
+        const unit = "pt";
+        const size = "A4";
+        const orientation = "portrait";
         html2canvas(input)
             .then((canvas) => {
-                const pdf = new jsPDF();
+                const pdf = new jsPDF(orientation, unit, size);
                 pdf.setFontSize(25);
                 pdf.autoTable({startY: 20, html: '#tableDiv'});
                 pdf.text(title, 50, 15);
@@ -183,7 +225,7 @@ const MainForm = (props) => {
             return (
                 <div>
                     <MDBBox  display="flex" justifyContent="center" className="mt-2" >
-                        <MDBCol className="mb-5" md="11">
+                        <MDBCol className="mb-5" md="12">
                             <MDBCard  className="ml-4">
                                 <MDBCardHeader tag="h5" className="text-center font-weight-bold text-uppercase py-4">
                                     Events for said program
@@ -203,7 +245,7 @@ const MainForm = (props) => {
                                             <tr>
 
                                                 {eventsArray[0].dataValues.map((value, index) => (
-                                                    <th className="text-center">{index+1}</th>
+                                                    <th key={index+1} className="text-center">{value.displayName}</th>
                                                 ))}
 
                                             </tr>
@@ -216,7 +258,7 @@ const MainForm = (props) => {
                                                     <td>{Math.ceil(moment(eventItem.eventDate).date() / 7)}</td>
 
                                                     {eventsArray[0].dataValues.map((value, index) => (
-                                                        <td>{value.value}</td>
+                                                        <td key={index}>{value.value}</td>
                                                     ))}
                                                 </tr>
                                             ))}
@@ -246,7 +288,7 @@ const MainForm = (props) => {
         else {
             return (
                 <MDBContainer>
-                    <MDBAlert color="danger text-center mt-5" >
+                    <MDBAlert color="danger" className="text-center mt-5" >
                         <p className="font-weight-bold">The Table has no data!</p>
                         <hr/>
                         <p className="font-italic">Go back and chose either a program, org unit or date that has data.</p>
@@ -357,7 +399,7 @@ const MainForm = (props) => {
                 </MDBCol>
             </MDBBox>: null}
             { showEvents ?
-                <MDBContainer>
+                <div className="overflow-hidden">
                     <MDBRow>
                         <MDBCol>
                             <MDBBtn color="cyan"
@@ -372,7 +414,7 @@ const MainForm = (props) => {
                             {EventsTable(events)}
                         </MDBCol>
                     </MDBRow>
-                </MDBContainer>
+                </div>
                  : null }
         </div>
     )
