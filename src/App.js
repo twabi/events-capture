@@ -1,12 +1,12 @@
 import React, {Fragment} from "react";
-import './App.css';
+import "./App.css";
 import MainForm from "./MainForm";
-import {getInstance} from 'd2';
+import {getInstance} from "d2";
 import {Switch, Route} from "react-router-dom";
 
 
 //authentication for the namis api
-const basicAuth = 'Basic ' + btoa('ahmed:Atwabi@20');
+//const basicAuth = "Basic " + btoa("ahmed:Atwabi@20");
 
 function App() {
 
@@ -14,7 +14,7 @@ function App() {
     const [programs, setPrograms]= React.useState([]);
 
     //initializing an array-to-tree library that will turn an array of org units into a tree form
-    var arrayToTree = require('array-to-tree');
+    var arrayToTree = require("array-to-tree");
 
     React.useEffect(() => {
 
@@ -31,7 +31,8 @@ function App() {
                     setPrograms(tempArray);
                 })
                 .catch((error) => {
-                console.log(error);
+                    console.log(error);
+                    alert("An error occurred: " + error);
             })
 
             d2.Api.getApi().get(unitEndpoint)
@@ -64,6 +65,7 @@ function App() {
                 })
                 .catch((error) => {
                     console.log(error);
+                    alert("An error occurred: " + error);
             });
         })
 
