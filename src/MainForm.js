@@ -16,6 +16,7 @@ import {getInstance} from "d2";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import "jspdf-autotable";
+import {TableExport} from "tableexport";
 
 const { RangePicker } = DatePicker;
 const weeks = [
@@ -114,7 +115,8 @@ const MainForm = (props) => {
         //var trackedID = selectedInstance[0].id;
         console.log( progID, orgID);
 
-        var id = "edb4aTWzQaZ"
+        //var id = "edb4aTWzQaZ";
+        var id = "kNaWeQScFWJ";
         getInstance().then((d2) => {
             const endpoint = `events.json?orgUnit=${id}&program=${progID}`
             d2.Api.getApi().get(endpoint)
@@ -148,6 +150,20 @@ const MainForm = (props) => {
     const handleBackButton = () => {
         setShowMenu(true);
         setShowEvents(false);
+    }
+
+    const exportCSV = (title) => {
+        var table = TableExport(document.getElementById("tableDiv"), {
+            filename: title,
+            exportButtons: false,
+            sheetname: title,
+        });
+        /* convert export data to a file for download */
+        var exportData = table.getExportData();
+        console.log(exportData)
+
+        var csvData = exportData.tableDiv.csv; // Replace with the kind of file you want from the exportData
+        table.export2file(csvData.data, csvData.mimeType, csvData.filename, csvData.fileExtension, csvData.merges, csvData.RTL, csvData.sheetname)
     }
 
     //the functions that prints the table to pdf format
@@ -206,7 +222,7 @@ const MainForm = (props) => {
                                         <span className="sr-only">Loading...</span>
                                     </div> : null}
                                     </MDBBtn>
-                                    <MDBBtn color="cyan" className="text-white">
+                                    <MDBBtn color="cyan" className="text-white" onClick={()=>{exportCSV("Events Table")}}>
                                         Print CSV {showCSVLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
                                         <span className="sr-only">Loading...</span>
                                     </div> : null}
