@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {MDBCardFooter, MDBContainer, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
+import {MDBAlert, MDBCardFooter, MDBContainer, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
 import {TreeSelect,DatePicker, Space } from "antd";
 import {
     MDBBox,
@@ -199,11 +199,19 @@ const MainForm = (props) => {
                                     <MDBTable id="tableDiv" striped bordered responsive className="border-dark border">
                                         <MDBTableHead color="primary-color" textWhite>
                                             <tr>
-                                                <th>Org Unit</th>
-                                                <th>Month</th>
-                                                <th>Week</th>
-                                                <th>Tracked-Instance</th>
-                                                <th>Stored By</th>
+                                                <th rowSpan="2" className="text-center text-uppercase"><b>Org Unit</b></th>
+                                                <th rowSpan="2" className="text-center text-uppercase"><b>Month</b></th>
+                                                <th rowSpan="2" className="text-center text-uppercase"><b>Week</b></th>
+                                                <th colSpan={eventsArray[0].dataValues.length} className="text-center text-uppercase">
+                                                    <b>Data-values</b>
+                                                </th>
+                                            </tr>
+                                            <tr>
+
+                                                {eventsArray[0].dataValues.map((value, index) => (
+                                                    <th className="text-center">{index+1}</th>
+                                                ))}
+
                                             </tr>
                                         </MDBTableHead>
                                         <MDBTableBody>
@@ -212,8 +220,10 @@ const MainForm = (props) => {
                                                     { index==0 && <td rowSpan={eventsArray.length}>{eventItem.orgUnitName}</td>}
                                                     <td>{moment(moment(eventItem.eventDate).month(), 'MM').format('MMMM')}</td>
                                                     <td>{Math.ceil(moment(eventItem.eventDate).date() / 7)}</td>
-                                                    <td>{eventItem.trackedEntityInstance}</td>
-                                                    <td>{eventItem.storedBy}</td>
+
+                                                    {eventsArray[0].dataValues.map((value, index) => (
+                                                        <td>{value.value}</td>
+                                                    ))}
                                                 </tr>
                                             ))}
 
@@ -238,7 +248,18 @@ const MainForm = (props) => {
 
                 </div>
             );
-    }
+        }
+        else {
+            return (
+                <MDBContainer>
+                    <MDBAlert color="danger text-center mt-5" >
+                        <p className="font-weight-bold">The Table has no data!</p>
+                        <hr/>
+                        <p className="font-italic">Go back and chose either a program, org unit or date that has data.</p>
+                    </MDBAlert>
+                </MDBContainer>
+            );
+        }
     }
 
 
