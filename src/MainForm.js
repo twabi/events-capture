@@ -153,6 +153,7 @@ const MainForm = (props) => {
     }
 
     const exportCSV = (title) => {
+        setShowCSV(true);
         var table = TableExport(document.getElementById("tableDiv"), {
             filename: title,
             exportButtons: false,
@@ -163,7 +164,8 @@ const MainForm = (props) => {
         console.log(exportData)
 
         var csvData = exportData.tableDiv.csv; // Replace with the kind of file you want from the exportData
-        table.export2file(csvData.data, csvData.mimeType, csvData.filename, csvData.fileExtension, csvData.merges, csvData.RTL, csvData.sheetname)
+        table.export2file(csvData.data, csvData.mimeType, csvData.filename, csvData.fileExtension, csvData.merges, csvData.RTL, csvData.sheetname);
+        setShowCSV(false);
     }
 
     //the functions that prints the table to pdf format
@@ -198,7 +200,8 @@ const MainForm = (props) => {
                                         <MDBTableHead color="primary-color" textWhite>
                                             <tr>
                                                 <th>Org Unit</th>
-                                                <th>Date</th>
+                                                <th>Month</th>
+                                                <th>Week</th>
                                                 <th>Tracked-Instance</th>
                                                 <th>Stored By</th>
                                             </tr>
@@ -207,7 +210,8 @@ const MainForm = (props) => {
                                             {eventsArray.map((eventItem, index) => (
                                                 <tr key={index}>
                                                     { index==0 && <td rowSpan={eventsArray.length}>{eventItem.orgUnitName}</td>}
-                                                    <td>{eventItem.eventDate}</td>
+                                                    <td>{moment(moment(eventItem.eventDate).month(), 'MM').format('MMMM')}</td>
+                                                    <td>{Math.ceil(moment(eventItem.eventDate).date() / 7)}</td>
                                                     <td>{eventItem.trackedEntityInstance}</td>
                                                     <td>{eventItem.storedBy}</td>
                                                 </tr>
