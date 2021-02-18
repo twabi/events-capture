@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {MDBAlert, MDBCardFooter, MDBContainer, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
+import {MDBAlert, MDBCardFooter, MDBContainer, MDBIcon, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
 import {TreeSelect,DatePicker, Space } from "antd";
 import {
     MDBBox,
@@ -19,12 +19,6 @@ import "jspdf-autotable";
 import {TableExport} from "tableexport";
 
 const { RangePicker } = DatePicker;
-const weeks = [
-    { value: 'week-1', label: 'Week 1' },
-    { value: 'week-2', label: 'Week 2' },
-    { value: 'week-3', label: 'Week 3' },
-    { value: 'week-4', label: 'Week 4' },
-]
 
 var moment = require("moment");
 
@@ -369,7 +363,7 @@ const MainForm = (props) => {
                             <MDBBtn color="cyan"
                                     onClick={handleBackButton}
                                     className="text-white float-lg-left mr-2" type="submit">
-                                Back
+                                <MDBIcon icon="angle-double-left mr-2" /> Back
                             </MDBBtn>
                         </MDBCol>
                     </MDBRow>

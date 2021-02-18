@@ -1,17 +1,19 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import 'antd/dist/antd.css'
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import "antd/dist/antd.css";
 import "mdbreact/dist/css/mdb.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { init } from 'd2';
+import "font-awesome/css/font-awesome.min.css";
+import "bootstrap-css-only/css/bootstrap.min.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { init } from "d2";
 import {BrowserRouter} from "react-router-dom";
 
-const basicAuth = 'Basic ' + btoa('ahmed:Atwabi@20');
+const basicAuth = "Basic " + btoa("ahmed:Atwabi@20");
 
-const developmentServer = 'https://covmw.com/namistest/api/';
+const developmentServer = "https://covmw.com/namistest/api/";
 const withBaseUrl = (baseUrl) => {
     init({
         baseUrl: baseUrl,
@@ -24,7 +26,7 @@ const withBaseUrl = (baseUrl) => {
     ReactDOM.render(
         <BrowserRouter>
             <App />
-        </BrowserRouter>, document.getElementById('root'));
+        </BrowserRouter>, document.getElementById("root"));
 };
 withBaseUrl(developmentServer);
 // If you want to start measuring performance in your app, pass a function
