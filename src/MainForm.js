@@ -138,16 +138,17 @@ const MainForm = (props) => {
         console.log( progID, orgID);
 
         //var id = "edb4aTWzQaZ";
-        var id = "C3RoODpOTz5";
-        //var id = "LE5Y1Da1Fk4";
+        //var id = "C3RoODpOTz5";
+        var id = "LE5Y1Da1Fk4";
         //var id = "l6CHbqiwSfR";
 
         getInstance().then((d2) => {
-            const endpoint = `events.json?orgUnit=${id}&program=${progID}`
+            const endpoint = `events.json?orgUnit=${id}&program=${progID}`;
+            var tempArray = []
             d2.Api.getApi().get(endpoint)
                 .then((response) => {
 
-                    var tempArray = []
+
                     response.events.map((item) => {
                         var date = moment(item.eventDate);
                         console.log(item)
@@ -158,26 +159,32 @@ const MainForm = (props) => {
                         }
                     });
 
-                    //setEvents(tempArray);
+                    setEvents(tempArray);
 
+                    console.log(tempArray);
 
+            }).then((results) => {
+                console.log(tempArray);
 
-                    //console.log(tempArray);
-
-            }).then(() => {
-                getData(events).then((data) => {
-                    console.log(data)
-                    setEvents(data);
-                }).then(() => {
-
-                    setShowMenu(false);
-                    setShowEvents(true);
+                if(events != null){
+                    getData(tempArray).then((data) => {
+                        //console.log(data)
+                        setEvents(data);
+                    }).then(() => {
+                        setShowMenu(false);
+                        setShowEvents(true);
+                        setShowLoading(false);
+                    });
+                } else {
+                    alert("events are null!");
                     setShowLoading(false);
-                });
+                }
+
             })
                 .catch((err) => {
                     console.log("An error occurred: " + err);
                     alert("An error occurred: " + err);
+                    setShowLoading(false);
                 })
         })
 
@@ -241,9 +248,8 @@ const MainForm = (props) => {
                                                 <th rowSpan="2" className="text-center text-uppercase"><b>Org Unit</b></th>
                                                 <th rowSpan="2" className="text-center text-uppercase"><b>Month</b></th>
                                                 <th rowSpan="2" className="text-center text-uppercase"><b>Week</b></th>
-                                                <th colSpan={eventsArray[0].dataValues.length} className="text-center text-uppercase">
-                                                    <b>Data-values</b>
-                                                </th>
+                                                <th rowSpan="2" className="text-center text-uppercase"><b>Instance</b></th>
+
                                             </tr>
                                             <tr>
 
@@ -257,8 +263,9 @@ const MainForm = (props) => {
                                             {eventsArray.map((eventItem, index) => (
                                                 <tr key={index}>
                                                     { index==0 && <td rowSpan={eventsArray.length}>{eventItem.orgUnitName}</td>}
-                                                    <td>{moment(moment(eventItem.eventDate).month(), 'MM').format('MMMM')}</td>
+                                                    <td>{moment(moment(eventItem.eventDate).year(), 'YYYY').format('YYYY') +", "+moment(moment(eventItem.eventDate).month() + 1, 'MM').format('MMMM')}</td>
                                                     <td>{Math.ceil(moment(eventItem.eventDate).date() / 7)}</td>
+                                                    <td>{eventItem.trackedEntityInstance}</td>
 
                                                     {eventsArray[0].dataValues.map((value, index) => (
                                                         <td key={index}>{value.value}</td>
