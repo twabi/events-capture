@@ -85,16 +85,33 @@ const MainForm = (props) => {
     };
 
     const handleProgram = selectedOption => {
-        setSelectedProgram(selectedOption);
+
+        console.log(selectedOption);
+
+        getInstance().then((d2) => {
+            const endpoint = `programs/${selectedOption.id}.json?fields=id,name,trackedEntityType[id,name]`;
+            d2.Api.getApi().get(endpoint)
+                .then((response) => {
+                    console.log(response.trackedEntityType.name);
+                    selectedOption.entityTypeName = response.trackedEntityType.name;
+                    setSelectedProgram(selectedOption);
+                })
+                .catch((error) => {
+                    console.log("An error occurred: " + error);
+                    alert("An error occurred: " + error);
+                });
+        });
+
     };
 
     const test = () => {
-        console.log(startDate);
-        var another = "2021-02-12T19:32:18";
-        var date = moment(another);
-        var start = moment(startDate);
-        var end = moment(endDate);
-        console.log(date.isBetween(start, end));
+        var tring = "AIMS fruits sold";
+        var plitt = tring.split(/\s+/);
+        console.log(plitt);
+        var an = "AIMS fruits sold".split(/\s+/).slice(1).join(" ")
+        console.log(an);
+        //console.log(plitt.join(" "))
+
     }
 
     const functionWithPromise = eventItem => { //a function that returns a promise
@@ -129,6 +146,8 @@ const MainForm = (props) => {
         console.log(selectedOrgUnit);
         console.log(selectedProgram);
 
+
+
         setShowLoading(true);
         var start = moment(startDate);
         var end = moment(endDate);
@@ -148,7 +167,6 @@ const MainForm = (props) => {
             d2.Api.getApi().get(endpoint)
                 .then((response) => {
 
-
                     response.events.map((item) => {
                         var date = moment(item.eventDate);
                         console.log(item)
@@ -159,26 +177,8 @@ const MainForm = (props) => {
                         }
                     });
 
-                    setEvents(tempArray);
-
+                    //setEvents(tempArray);
                     console.log(tempArray);
-
-            }).then((results) => {
-                console.log(tempArray);
-
-                if(events != null){
-                    getData(tempArray).then((data) => {
-                        //console.log(data)
-                        setEvents(data);
-                    }).then(() => {
-                        setShowMenu(false);
-                        setShowEvents(true);
-                        setShowLoading(false);
-                    });
-                } else {
-                    alert("events are null!");
-                    setShowLoading(false);
-                }
 
             })
                 .catch((err) => {
@@ -186,7 +186,27 @@ const MainForm = (props) => {
                     alert("An error occurred: " + err);
                     setShowLoading(false);
                 })
-        })
+                .finally(() => {
+                    console.log(tempArray);
+
+                    if(tempArray != null){
+
+                        getData(tempArray)
+                            .then((data) => {
+                            console.log(data)
+                            setEvents(data);
+                        }).finally(() =>{
+                            setShowMenu(false);
+                            setShowEvents(true);
+                            setShowLoading(false);
+                        });
+                    } else {
+                        alert("events are null! Try again!");
+                        setShowLoading(false);
+                    }
+
+                });
+        });
 
     };
 
@@ -204,7 +224,7 @@ const MainForm = (props) => {
         });
         /* convert export data to a file for download */
         var exportData = table.getExportData();
-        console.log(exportData)
+        console.log(exportData);
 
         var csvData = exportData.tableDiv.csv; // Replace with the kind of file you want from the exportData
         table.export2file(csvData.data, csvData.mimeType, csvData.filename, csvData.fileExtension, csvData.merges, csvData.RTL, csvData.sheetname);
@@ -231,14 +251,14 @@ const MainForm = (props) => {
     }
 
     const EventsTable = (eventsArray) => {
-        if(eventsArray !== null && eventsArray.length !== 0){
+        if((eventsArray !== null && eventsArray.length !== 0) || eventsArray[0].dataValues[0].displayName !== null){
             return (
                 <div>
                     <MDBBox  display="flex" justifyContent="center" className="mt-2" >
                         <MDBCol className="mb-5" md="12">
                             <MDBCard  className="ml-4">
                                 <MDBCardHeader tag="h5" className="text-center font-weight-bold text-uppercase py-4">
-                                    Events for said program
+                                    {selectedProgram.label}
                                 </MDBCardHeader>
 
                                 <MDBCardBody  >
@@ -248,13 +268,13 @@ const MainForm = (props) => {
                                                 <th rowSpan="2" className="text-center text-uppercase"><b>Org Unit</b></th>
                                                 <th rowSpan="2" className="text-center text-uppercase"><b>Month</b></th>
                                                 <th rowSpan="2" className="text-center text-uppercase"><b>Week</b></th>
-                                                <th rowSpan="2" className="text-center text-uppercase"><b>Instance</b></th>
+                                                <th rowSpan="2" className="text-center text-uppercase"><b>{selectedProgram.entityTypeName}</b></th>
 
                                             </tr>
                                             <tr>
 
                                                 {eventsArray[0].dataValues.map((value, index) => (
-                                                    <th key={index+1} className="text-center">{value.displayName}</th>
+                                                    <th key={index+1} className="text-center">{value.displayName && value.displayName.split(/\s+/).slice(1).join(" ")}</th>
                                                 ))}
 
                                             </tr>
