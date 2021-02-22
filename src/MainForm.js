@@ -19,6 +19,7 @@ import html2canvas from "html2canvas";
 import "jspdf-autotable";
 import {TableExport} from "tableexport";
 import {Link} from "react-router-dom";
+import _ from "underscore";
 
 const { RangePicker } = DatePicker;
 
@@ -172,15 +173,22 @@ const MainForm = (props) => {
                             /* vendors contains the element we're looking for */
                             console.log("these are similar");
                         } else {
+
                             item.dataValues.map((dataItem) => {
-                                tempArray1.push(
-                                    {"created": dataItem.created, "dataElement": dataItem.dataElement,
-                                        "displayName": dataItem.displayName, "lastUpdated": dataItem.lastUpdated,
-                                        "providedElsewhere": false, "storedBy": dataItem.storedBy, "value": "-"}
-                                );
+                                var found = array[index+1].dataValues.some(function(value) {
+                                    return value.dataElement === dataItem.dataElement;
+                                });
+                                console.log(found);
+                                if(!found){
+                                    array[index+1].dataValues.push(
+                                        {"created": dataItem.created, "dataElement": dataItem.dataElement,
+                                            "displayName": dataItem.displayName, "lastUpdated": dataItem.lastUpdated,
+                                            "providedElsewhere": false, "storedBy": dataItem.storedBy, "value": "-"}
+                                    );
+                                }
                             });
 
-                            tempArray2.push(
+                            item.dataValues.push(
                                 {"created": arrayItem.created, "dataElement": arrayItem.dataElement,
                                     "displayName": arrayItem.displayName, "lastUpdated": arrayItem.lastUpdated,
                                     "providedElsewhere": false, "storedBy": arrayItem.storedBy, "value": "-"}
@@ -190,13 +198,14 @@ const MainForm = (props) => {
 
                     //console.log(tempArray2);
                     //console.log(tempArray1);
-                    item.dataValues.push(tempArray2);
-                    item.dataValues.concat(tempArray2);
-                    array[index+1].dataValues.concat(tempArray1)
+                    //item.dataValues.push(tempArray2);
+                    //item.dataValues.concat(tempArray2);
+                    //array[index+1].dataValues.sort((a, b) => a.displayName.localeCompare(b.displayName));
+                    //item.dataValues.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
 
                 }
             }
-
         }
     }
 
@@ -234,6 +243,8 @@ const MainForm = (props) => {
                         }
                     });
 
+                    tempArray.forEach(iterate);
+
                     //setEvents(tempArray);
                     //console.log(tempArray);
 
@@ -255,7 +266,19 @@ const MainForm = (props) => {
 
                                 //console.log(data.forEach(((v,i,a) => a.findIndex(t=>(t.dataValues === v.dataValues))===i)));
                                 //console.log(data);
-                                data.forEach(iterate);
+                                //data.forEach(iterate);
+
+                                var sampleArray = [];
+                                var valueData = {"values" : []}
+                                data.map((dataItem) => {
+                                    dataItem.dataValues.map((item) =>{
+                                        var actualValue = {"eventID" : dataItem.event, "id" : item.dataElement, "value" : item.value}
+                                        sampleArray.push(actualValue);
+                                    })
+                                })
+
+                                console.log(sampleArray);
+
                                 console.log(data);
                                 tempArray = data
                                 setEvents(data);
@@ -319,7 +342,7 @@ const MainForm = (props) => {
 
     const EventsTable = (eventsArray) => {
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
-        console.log(analyzed);
+        //console.log(analyzed);
         //console.log(eventsArray);
 
         if((eventsArray !== null && eventsArray.length !== 0) && analyzed.length !== null){
