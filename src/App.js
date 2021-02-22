@@ -3,6 +3,7 @@ import "./App.css";
 import MainForm from "./MainForm";
 import {getInstance} from "d2";
 import {Switch, Route} from "react-router-dom";
+import EventTable from "./EventTable";
 
 
 //authentication for the namis api
@@ -80,6 +81,7 @@ function App() {
                           programs={programs}
                          organizationalUnits={orgUnits}/>
             )} exact/>
+            <Route path="/eventsTable" render={(props) => <EventTable {...props}/>} exact/>
         </Switch>
     </Fragment>
    );

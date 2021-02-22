@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {MDBAlert, MDBCardFooter, MDBContainer, MDBIcon, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
 import {TreeSelect,DatePicker, Space } from "antd";
+import { Redirect } from "react-router";
 import {
     MDBBox,
     MDBBtn,
@@ -17,6 +18,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import "jspdf-autotable";
 import {TableExport} from "tableexport";
+import {Link} from "react-router-dom";
 
 const { RangePicker } = DatePicker;
 
@@ -37,7 +39,7 @@ const MainForm = (props) => {
     const [showMenu, setShowMenu] = useState(true);
     const [showPrintLoading, setShowPrintLoading] = useState(false);
     const [showCSVLoading, setShowCSV] = useState(false);
-    const [number, setNumber] = useState(3);
+    const [headerNames, setHeaderNames] = useState([]);
 
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
@@ -105,30 +107,42 @@ const MainForm = (props) => {
     };
 
     const test = () => {
-        var tring = "AIMS fruits sold";
-        var plitt = tring.split(/\s+/);
-        console.log(plitt);
-        var an = "AIMS fruits sold".split(/\s+/).slice(1).join(" ")
-        console.log(an);
-        //console.log(plitt.join(" "))
-
+       //setRedirect(true);
+        return <Redirect
+            to={{
+                pathname: "/EventsTable",
+                state: { events: events }
+            }}
+        />;
     }
 
     const functionWithPromise = eventItem => { //a function that returns a promise
+        var tempArray = [];
+        //var dataOver = {"orgUnitName" : eventItem.orgUnitName, "eventDate" : eventItem.eventDate, "dataValues" :[]};
         getInstance().then((d2) => {
-            eventItem.dataValues.map((dataValue) =>{
-                const endpoint = `dataElements/${dataValue.dataElement}.json`;
-                d2.Api.getApi().get(endpoint)
-                    .then((response) => {
-                        console.log(response.displayName);
-                        dataValue.displayName = response.displayName;
-                    })
-                    .catch((error) => {
-                        console.log("An error occurred: " + error);
-                        alert("An error occurred: " + error);
-                    });
+            eventItem.dataValues.map((dataValue) => {
+            const endpoint = `dataElements/${dataValue.dataElement}.json`;
+            d2.Api.getApi().get(endpoint)
+                .then((response) => {
+                    //console.log(dataValue);
+                    //console.log(dataValue.dataElement);
+                    var data = {"id" : response.id, "name" : response.displayFormName,
+                        "trackedInstance" : eventItem.trackedEntityInstance};
+                    dataValue.displayName = response.displayFormName;
+
+                    tempArray.push(data);
+                    setHeaderNames(headerName => [...headerName, data]);
+                })
+                .catch((error) => {
+                    console.log("An error occurred: " + error);
+                    alert("An error occurred: " + error);
+                });
             });
+
+            //dataOver.dataValues = tempArray;
+            //setHeaderNames(headerName => [...headerName, dataOver]);
         });
+
 
         return eventItem;
     }
@@ -138,15 +152,58 @@ const MainForm = (props) => {
     }
 
     const getData = async (list) => {
-        return Promise.all(list.map(item => anAsyncFunction(item)))
+        return await Promise.all(list.map(item => anAsyncFunction(item)))
+    }
+
+    function iterate(item, index, array) {
+        //console.log(item);
+        //console.log(array[index+1])
+        if (index !== array.length-1) {
+            console.log(item.dataValues.length)
+            console.log(array[index+1].dataValues.length)
+            if(item.dataValues.length !== 0 || array[index+1].dataValues.length !== 0){
+                if(array[index+1].dataValues.length < item.dataValues.length){
+                    console.log("the next element is smaller");
+
+                    var tempArray1 = [];
+                    var tempArray2 = []
+                    array[index+1].dataValues.map((arrayItem) => {
+                        if (item.dataValues.some(e => e.dataElement === arrayItem.dataElement)) {
+                            /* vendors contains the element we're looking for */
+                            console.log("these are similar");
+                        } else {
+                            item.dataValues.map((dataItem) => {
+                                tempArray1.push(
+                                    {"created": dataItem.created, "dataElement": dataItem.dataElement,
+                                        "displayName": dataItem.displayName, "lastUpdated": dataItem.lastUpdated,
+                                        "providedElsewhere": false, "storedBy": dataItem.storedBy, "value": "-"}
+                                );
+                            });
+
+                            tempArray2.push(
+                                {"created": arrayItem.created, "dataElement": arrayItem.dataElement,
+                                    "displayName": arrayItem.displayName, "lastUpdated": arrayItem.lastUpdated,
+                                    "providedElsewhere": false, "storedBy": arrayItem.storedBy, "value": "-"}
+                            )
+                        }
+                    });
+
+                    //console.log(tempArray2);
+                    //console.log(tempArray1);
+                    item.dataValues.push(tempArray2);
+                    item.dataValues.concat(tempArray2);
+                    array[index+1].dataValues.concat(tempArray1)
+
+                }
+            }
+
+        }
     }
 
     const handleLoadEvents = () => {
 
-        console.log(selectedOrgUnit);
-        console.log(selectedProgram);
-
-
+        //console.log(selectedOrgUnit);
+        //console.log(selectedProgram);
 
         setShowLoading(true);
         var start = moment(startDate);
@@ -154,7 +211,7 @@ const MainForm = (props) => {
         var progID = selectedProgram.id;
         var orgID = selectedOrgUnit[0].id;
         //var trackedID = selectedInstance[0].id;
-        console.log( progID, orgID);
+        //console.log( progID, orgID);
 
         //var id = "edb4aTWzQaZ";
         //var id = "C3RoODpOTz5";
@@ -169,7 +226,7 @@ const MainForm = (props) => {
 
                     response.events.map((item) => {
                         var date = moment(item.eventDate);
-                        console.log(item)
+                        //console.log(item)
                         //console.log(date.month(), date.date());
                         //console.log(day)
                         if(date.isBetween(start, end)){
@@ -178,7 +235,7 @@ const MainForm = (props) => {
                     });
 
                     //setEvents(tempArray);
-                    console.log(tempArray);
+                    //console.log(tempArray);
 
             })
                 .catch((err) => {
@@ -187,18 +244,28 @@ const MainForm = (props) => {
                     setShowLoading(false);
                 })
                 .finally(() => {
-                    console.log(tempArray);
+                    //console.log(tempArray);
 
                     if(tempArray != null){
 
-                        getData(tempArray)
+                         getData(tempArray)
                             .then((data) => {
-                            console.log(data)
-                            setEvents(data);
-                        }).finally(() =>{
+                                console.log(data);
+                                //setHeaderNames(data);
+
+                                //console.log(data.forEach(((v,i,a) => a.findIndex(t=>(t.dataValues === v.dataValues))===i)));
+                                //console.log(data);
+                                data.forEach(iterate);
+                                console.log(data);
+                                tempArray = data
+                                setEvents(data);
+                        }).finally(() => {
+
+                            //console.log(headerNames);
                             setShowMenu(false);
                             setShowEvents(true);
                             setShowLoading(false);
+
                         });
                     } else {
                         alert("events are null! Try again!");
@@ -251,7 +318,12 @@ const MainForm = (props) => {
     }
 
     const EventsTable = (eventsArray) => {
-        if((eventsArray !== null && eventsArray.length !== 0) || eventsArray[0].dataValues[0].displayName !== null){
+        var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
+        console.log(analyzed);
+        //console.log(eventsArray);
+
+        if((eventsArray !== null && eventsArray.length !== 0) && analyzed.length !== null){
+
             return (
                 <div>
                     <MDBBox  display="flex" justifyContent="center" className="mt-2" >
@@ -273,8 +345,8 @@ const MainForm = (props) => {
                                             </tr>
                                             <tr>
 
-                                                {eventsArray[0].dataValues.map((value, index) => (
-                                                    <th key={index+1} className="text-center">{value.displayName && value.displayName.split(/\s+/).slice(1).join(" ")}</th>
+                                                {analyzed.map((value, index) => (
+                                                    <th key={index+1} className="text-center" id={value.id}>{value.name}</th>
                                                 ))}
 
                                             </tr>
@@ -287,9 +359,11 @@ const MainForm = (props) => {
                                                     <td>{Math.ceil(moment(eventItem.eventDate).date() / 7)}</td>
                                                     <td>{eventItem.trackedEntityInstance}</td>
 
-                                                    {eventsArray[0].dataValues.map((value, index) => (
-                                                        <td key={index}>{value.value}</td>
-                                                    ))}
+
+                                                    {eventItem.dataValues.map((valueItem, num) => (
+                                                                <td key={num}>{valueItem.dataElement ? valueItem.value : "-"}</td>
+                                                            )
+                                                        )}
                                                 </tr>
                                             ))}
 
@@ -417,6 +491,7 @@ const MainForm = (props) => {
                             </MDBContainer>
 
                             <div className="text-center py-4 mt-2">
+
                                 <MDBBtn color="cyan" className="text-white" onClick={handleLoadEvents}>
                                     Show Events {showLoading ? <div className="spinner-border mx-2 text-white spinner-border-sm" role="status">
                                     <span className="sr-only">Loading...</span>
