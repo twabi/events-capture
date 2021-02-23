@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import {MDBAlert, MDBCardFooter, MDBContainer, MDBIcon, MDBRow, MDBTable, MDBTableBody, MDBTableHead} from "mdbreact";
+import "mdbreact/dist/css/mdb.css";
+import {
+    MDBAlert,
+    MDBCardFooter,
+    MDBContainer, MDBDataTable,
+    MDBDataTableV5,
+    MDBIcon,
+    MDBRow,
+    MDBTable,
+    MDBTableBody,
+    MDBTableHead
+} from "mdbreact";
 import {TreeSelect,DatePicker, Space } from "antd";
 import { Redirect } from "react-router";
 import {
@@ -20,6 +31,7 @@ import "jspdf-autotable";
 import {TableExport} from "tableexport";
 import {Link} from "react-router-dom";
 import _ from "underscore";
+import dataElement from "d2/model/config/model-defaults/dataElement";
 
 const { RangePicker } = DatePicker;
 
@@ -41,7 +53,7 @@ const MainForm = (props) => {
     const [showPrintLoading, setShowPrintLoading] = useState(false);
     const [showCSVLoading, setShowCSV] = useState(false);
     const [headerNames, setHeaderNames] = useState([]);
-
+    const [dataTable, setDataTable] = useState(null);
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
     const [value, setValue] = useState();
@@ -257,6 +269,33 @@ const MainForm = (props) => {
                 .finally(() => {
                     //console.log(tempArray);
 
+                    var tableData = {
+                        columns : [
+                            {
+                                label: 'Org Unit',
+                                field: 'orgUnit',
+                                attributes: {
+                                    'aria-controls': 'DataTable',
+                                    'aria-label': 'Org Unit',
+                                },
+                            },
+                            {
+                                label: 'Month',
+                                field: 'month',
+                            },
+                            {
+                                label: 'Week',
+                                field: 'week',
+                            },{
+                                label: selectedProgram.entityTypeName,
+                                field: selectedProgram.entityTypeName,
+                            },
+                        ],
+                        rows : [],
+                    }
+
+
+
                     if(tempArray != null){
 
                          getData(tempArray)
@@ -268,18 +307,35 @@ const MainForm = (props) => {
                                 //console.log(data);
                                 //data.forEach(iterate);
 
-                                var sampleArray = [];
-                                var valueData = {"values" : []}
-                                data.map((dataItem) => {
-                                    dataItem.dataValues.map((item) =>{
-                                        var actualValue = {"eventID" : dataItem.event, "id" : item.dataElement, "value" : item.value}
-                                        sampleArray.push(actualValue);
-                                    })
+                                var colArray = [];
+                                var rowArray = [];
+                                console.log(data);
+                                data[0].dataValues.map((item) => {
+                                    var colData = {
+                                        label: item.displayName,
+                                        field: item.dataElement,
+                                    }
+                                    tableData.columns.push(colData);
                                 })
 
-                                console.log(sampleArray);
+                                data.map((dataItem) => {
+                                    var rowData = {
+                                        orgUnit: dataItem.orgUnitName,
+                                        month: moment(moment(dataItem.eventDate).year(), 'YYYY').format('YYYY') +", "+moment(moment(dataItem.eventDate).month() + 1, 'MM').format('MMMM'),
+                                        week: Math.ceil(moment(dataItem.eventDate).date() / 7),
+                                    }
+                                    dataItem.dataValues.map((dataValue) => {
 
-                                console.log(data);
+                                        rowData[dataValue.dataElement] = dataValue.value;
+                                        rowData[selectedProgram.entityTypeName] = dataItem.trackedEntityInstance;
+
+                                    })
+                                    tableData.rows.push(rowData);
+                                })
+
+                                console.log(tableData)
+                                setDataTable(tableData);
+
                                 tempArray = data
                                 setEvents(data);
                         }).finally(() => {
@@ -344,8 +400,33 @@ const MainForm = (props) => {
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
         //console.log(analyzed);
         //console.log(eventsArray);
+        console.log(dataTable);
 
-        if((eventsArray !== null && eventsArray.length !== 0) && analyzed.length !== null){
+
+        if((eventsArray !== null && eventsArray.length !== 0) && analyzed.length !== null && dataTable !== null){
+            dataTable.columns.map((arrayItem) => {
+                analyzed.map((item) => {
+                    if (item.id === arrayItem.field) {
+                        console.log("equal");
+                        arrayItem.label = item.name;
+                    }
+                })
+
+            })
+
+            const widerData = {
+                columns: [
+                    ...dataTable.columns.map((col) => {
+                        col.width = 150;
+                        return col;
+                    }),
+                ],
+                rows: [...dataTable.rows],
+            };
+
+            console.log(dataTable)
+            console.log(dataTable.rows[0]);
+
 
             return (
                 <div>
@@ -357,41 +438,15 @@ const MainForm = (props) => {
                                 </MDBCardHeader>
 
                                 <MDBCardBody  >
-                                    <MDBTable id="tableDiv" striped bordered responsive className="border-dark border">
-                                        <MDBTableHead color="primary-color" textWhite>
-                                            <tr>
-                                                <th rowSpan="2" className="text-center text-uppercase"><b>Org Unit</b></th>
-                                                <th rowSpan="2" className="text-center text-uppercase"><b>Month</b></th>
-                                                <th rowSpan="2" className="text-center text-uppercase"><b>Week</b></th>
-                                                <th rowSpan="2" className="text-center text-uppercase"><b>{selectedProgram.entityTypeName}</b></th>
-
-                                            </tr>
-                                            <tr>
-
-                                                {analyzed.map((value, index) => (
-                                                    <th key={index+1} className="text-center" id={value.id}>{value.name}</th>
-                                                ))}
-
-                                            </tr>
-                                        </MDBTableHead>
-                                        <MDBTableBody>
-                                            {eventsArray.map((eventItem, index) => (
-                                                <tr key={index}>
-                                                    { index==0 && <td rowSpan={eventsArray.length}>{eventItem.orgUnitName}</td>}
-                                                    <td>{moment(moment(eventItem.eventDate).year(), 'YYYY').format('YYYY') +", "+moment(moment(eventItem.eventDate).month() + 1, 'MM').format('MMMM')}</td>
-                                                    <td>{Math.ceil(moment(eventItem.eventDate).date() / 7)}</td>
-                                                    <td>{eventItem.trackedEntityInstance}</td>
-
-
-                                                    {eventItem.dataValues.map((valueItem, num) => (
-                                                                <td key={num}>{valueItem.dataElement ? valueItem.value : "-"}</td>
-                                                            )
-                                                        )}
-                                                </tr>
-                                            ))}
-
-                                        </MDBTableBody>
-                                    </MDBTable>
+                                    <MDBDataTableV5
+                                        striped
+                                        className="text-center"
+                                        theadColor={"primary-color"}
+                                        theadTextWhite
+                                        hover
+                                        scrollX
+                                        data={widerData}
+                                    />
                                 </MDBCardBody>
                                 <MDBCardFooter className="d-flex justify-content-center ">
                                     <MDBBtn color="cyan" className="text-white" onClick={()=>{exportPDF("Events Table")}}>
