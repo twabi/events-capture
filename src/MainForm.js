@@ -29,6 +29,8 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import "jspdf-autotable";
 import {TableExport} from "tableexport";
+import * as htmlToImage from 'html-to-image';
+import { toPng, toJpeg, toBlob, toPixelData, toSvg } from 'html-to-image';
 import {Link} from "react-router-dom";
 import _ from "underscore";
 import dataElement from "d2/model/config/model-defaults/dataElement";
@@ -121,13 +123,17 @@ const MainForm = (props) => {
     };
 
     const test = () => {
-       //setRedirect(true);
-        return <Redirect
-            to={{
-                pathname: "/EventsTable",
-                state: { events: events }
-            }}
-        />;
+        htmlToImage.toPng(document.getElementById('tableDiv'), { quality: 0.95 })
+            .then(function (dataUrl) {
+                var link = document.createElement('a');
+                link.download = 'my-image-name.jpeg';
+                const pdf = new jsPDF();
+                const imgProps= pdf.getImageProperties(dataUrl);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(dataUrl, 'PNG', 0, 0,pdfWidth, pdfHeight);
+                pdf.save("download.pdf");
+            });
     }
 
     const functionWithPromise = eventItem => { //a function that returns a promise
@@ -378,18 +384,24 @@ const MainForm = (props) => {
     const exportPDF = (title) => {
         setShowPrintLoading(true);
         const input = document.getElementById('tableDiv');
+        var width = input.style.width;
+        input.style.width = "auto";
         const unit = "pt";
         const size = "A4";
-        const orientation = "portrait";
-        html2canvas(input)
+        const orientation = "landscape";
+        html2canvas(input, {
+            scrollX: 0,
+            scrollY: 0
+        })
             .then((canvas) => {
                 const pdf = new jsPDF(orientation, unit, size);
                 pdf.setFontSize(25);
                 pdf.autoTable({startY: 20, html: '#tableDiv'});
-                pdf.text(title, 50, 15);
                 pdf.save(title + ".pdf");
-            }).then(() => {
-            setShowPrintLoading(false);
+            })
+            .then(() => {
+                input.style.width = width;
+                setShowPrintLoading(false);
         });
     }
 
@@ -443,6 +455,7 @@ const MainForm = (props) => {
 
                                 <MDBCardBody  >
                                     <MDBDataTableV5
+                                        id={"tableDiv"}
                                         striped
                                         className="text-center"
                                         theadColor={"primary-color"}
@@ -453,7 +466,7 @@ const MainForm = (props) => {
                                     />
                                 </MDBCardBody>
                                 <MDBCardFooter className="d-flex justify-content-center ">
-                                    <MDBBtn color="cyan" className="text-white" onClick={()=>{exportPDF("Events Table")}}>
+                                    <MDBBtn color="cyan" className="text-white" onClick={()=>{test()}}>
                                         Print PDF {showPrintLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
                                         <span className="sr-only">Loading...</span>
                                     </div> : null}
