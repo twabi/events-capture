@@ -380,6 +380,21 @@ const MainForm = (props) => {
         setShowCSV(false);
     }
 
+    const exportXL = (title) => {
+        setShowPrintLoading(true);
+        var table = TableExport(document.getElementById("tableDiv"), {
+            filename: title,
+            exportButtons: false,
+            sheetname: title,
+        });
+        /* convert export data to a file for download */
+        var exportData = table.getExportData();
+        var xlsxData = exportData.tableDiv.xlsx; // Replace with the kind of file you want from the exportData
+        table.export2file(xlsxData.data, xlsxData.mimeType, xlsxData.filename, xlsxData.fileExtension, xlsxData.merges, xlsxData.RTL, xlsxData.sheetname);
+        setShowPrintLoading(false);
+    }
+
+
     //the functions that prints the table to pdf format
     const exportPDF = (title) => {
         setShowPrintLoading(true);
@@ -466,8 +481,8 @@ const MainForm = (props) => {
                                     />
                                 </MDBCardBody>
                                 <MDBCardFooter className="d-flex justify-content-center ">
-                                    <MDBBtn color="cyan" className="text-white" onClick={()=>{test()}}>
-                                        Print PDF {showPrintLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
+                                    <MDBBtn color="cyan" className="text-white" onClick={()=>{exportXL("Events Table")}}>
+                                        Print Excel {showPrintLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
                                         <span className="sr-only">Loading...</span>
                                     </div> : null}
                                     </MDBBtn>
