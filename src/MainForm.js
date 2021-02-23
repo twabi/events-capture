@@ -57,6 +57,7 @@ const MainForm = (props) => {
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
     const [value, setValue] = useState();
+    const [inputs, setInputs] = useState([]);
     const disabledDate = current => {
         if (!dates || dates.length === 0) {
             return false;
@@ -141,7 +142,6 @@ const MainForm = (props) => {
                             "trackedInstance" : eventItem.trackedEntityInstance};
                         dataValue.displayName = response.displayFormName;
 
-
                         setHeaderNames(headerName => [...headerName, data]);
                     })
                     .catch((error) => {
@@ -169,6 +169,8 @@ const MainForm = (props) => {
                 d2.Api.getApi().get(entityPoint).then((response) => {
                     console.log(response);
                     eventItem.instanceName = response.attributes[0].value;
+                    var data = {"event" : eventItem.event, "name" : response.attributes[0].value}
+                    setInputs(inputs => [...inputs, data]);
                 }).catch((error) => {
                     console.log("An error occurred: " + error);
                     alert("An error occurred: " + error);
@@ -318,6 +320,8 @@ const MainForm = (props) => {
                                         orgUnit: dataItem.orgUnitName,
                                         month: moment(moment(dataItem.eventDate).year(), 'YYYY').format('YYYY') +", "+moment(moment(dataItem.eventDate).month() + 1, 'MM').format('MMMM'),
                                         week: Math.ceil(moment(dataItem.eventDate).date() / 7),
+                                        event: dataItem.event,
+                                        instanceTitle: selectedProgram.entityTypeName,
                                     }
                                     dataItem.dataValues.map((dataValue) => {
 
@@ -391,8 +395,10 @@ const MainForm = (props) => {
 
     const EventsTable = (eventsArray) => {
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
+        console.log(inputs);
 
-        if((eventsArray !== null && eventsArray.length !== 0) && analyzed.length !== null && dataTable !== null){
+        if((eventsArray !== null && eventsArray.length !== 0) && analyzed.length !== null
+            && dataTable.rows.length !== 0 && inputs.length !== 0){
             dataTable.columns.map((arrayItem) => {
                 analyzed.map((item) => {
                     if (item.id === arrayItem.field) {
@@ -400,8 +406,17 @@ const MainForm = (props) => {
                         arrayItem.label = item.name;
                     }
                 })
-
             });
+            try{
+                dataTable.rows.map((row, index) => {
+                    if(row.event === inputs[index].event){
+                        row[row.instanceTitle] = inputs[index].name;
+                    }
+
+                });
+            } catch (e) {
+                //alert(e)
+            }
 
             const widerData = {
                 columns: [
