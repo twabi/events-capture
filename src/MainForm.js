@@ -130,34 +130,53 @@ const MainForm = (props) => {
     }
 
     const functionWithPromise = eventItem => { //a function that returns a promise
-        var tempArray = [];
-        //var dataOver = {"orgUnitName" : eventItem.orgUnitName, "eventDate" : eventItem.eventDate, "dataValues" :[]};
         getInstance().then((d2) => {
             eventItem.dataValues.map((dataValue) => {
-            const endpoint = `dataElements/${dataValue.dataElement}.json`;
-            d2.Api.getApi().get(endpoint)
-                .then((response) => {
-                    //console.log(dataValue);
-                    //console.log(dataValue.dataElement);
-                    var data = {"id" : response.id, "name" : response.displayFormName,
-                        "trackedInstance" : eventItem.trackedEntityInstance};
-                    dataValue.displayName = response.displayFormName;
+                const endpoint = `dataElements/${dataValue.dataElement}.json`;
+                d2.Api.getApi().get(endpoint)
+                    .then((response) => {
+                        //console.log(dataValue);
+                        //console.log(dataValue.dataElement);
+                        var data = {"id" : response.id, "name" : response.displayFormName,
+                            "trackedInstance" : eventItem.trackedEntityInstance};
+                        dataValue.displayName = response.displayFormName;
 
-                    tempArray.push(data);
-                    setHeaderNames(headerName => [...headerName, data]);
-                })
-                .catch((error) => {
-                    console.log("An error occurred: " + error);
-                    alert("An error occurred: " + error);
-                });
+
+                        setHeaderNames(headerName => [...headerName, data]);
+                    })
+                    .catch((error) => {
+                        console.log("An error occurred: " + error);
+                        alert("An error occurred: " + error);
+                    });
             });
+
+
 
             //dataOver.dataValues = tempArray;
             //setHeaderNames(headerName => [...headerName, dataOver]);
+
         });
 
 
         return eventItem;
+    }
+
+
+    const functionTracked = async (array) => { //a function that returns a promise
+        await Promise.all(array.map((eventItem) => {
+            getInstance().then((d2) => {
+                const entityPoint = `trackedEntityInstances/${eventItem.trackedEntityInstance}.json?program=${eventItem.program}&fields=attributes[value]`
+                d2.Api.getApi().get(entityPoint).then((response) => {
+                    console.log(response);
+                    eventItem.instanceName = response.attributes[0].value;
+                }).catch((error) => {
+                    console.log("An error occurred: " + error);
+                    alert("An error occurred: " + error);
+                })
+            })
+        }));
+
+        return array;
     }
 
     const anAsyncFunction = async item => {
@@ -178,8 +197,6 @@ const MainForm = (props) => {
                 if(array[index+1].dataValues.length < item.dataValues.length){
                     console.log("the next element is smaller");
 
-                    var tempArray1 = [];
-                    var tempArray2 = []
                     array[index+1].dataValues.map((arrayItem) => {
                         if (item.dataValues.some(e => e.dataElement === arrayItem.dataElement)) {
                             /* vendors contains the element we're looking for */
@@ -207,21 +224,12 @@ const MainForm = (props) => {
                             )
                         }
                     });
-
-                    //console.log(tempArray2);
-                    //console.log(tempArray1);
-                    //item.dataValues.push(tempArray2);
-                    //item.dataValues.concat(tempArray2);
-                    //array[index+1].dataValues.sort((a, b) => a.displayName.localeCompare(b.displayName));
-                    //item.dataValues.sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-
                 }
             }
         }
     }
 
-    const handleLoadEvents = () => {
+    const  handleLoadEvents = async () => {
 
         //console.log(selectedOrgUnit);
         //console.log(selectedProgram);
@@ -247,19 +255,18 @@ const MainForm = (props) => {
 
                     response.events.map((item) => {
                         var date = moment(item.eventDate);
-                        //console.log(item)
-                        //console.log(date.month(), date.date());
-                        //console.log(day)
                         if(date.isBetween(start, end)){
                             tempArray.push(item);
                         }
                     });
 
-                    tempArray.forEach(iterate);
+                    functionTracked(tempArray).then((data) => {
+                        console.log(data);
+                        tempArray = data;
+                        tempArray.forEach(iterate);
+                    }).finally(() => {
 
-                    //setEvents(tempArray);
-                    //console.log(tempArray);
-
+                    });
             })
                 .catch((err) => {
                     console.log("An error occurred: " + err);
@@ -267,7 +274,6 @@ const MainForm = (props) => {
                     setShowLoading(false);
                 })
                 .finally(() => {
-                    //console.log(tempArray);
 
                     var tableData = {
                         columns : [
@@ -294,21 +300,10 @@ const MainForm = (props) => {
                         rows : [],
                     }
 
-
-
                     if(tempArray != null){
 
                          getData(tempArray)
                             .then((data) => {
-                                console.log(data);
-                                //setHeaderNames(data);
-
-                                //console.log(data.forEach(((v,i,a) => a.findIndex(t=>(t.dataValues === v.dataValues))===i)));
-                                //console.log(data);
-                                //data.forEach(iterate);
-
-                                var colArray = [];
-                                var rowArray = [];
                                 console.log(data);
                                 data[0].dataValues.map((item) => {
                                     var colData = {
@@ -318,7 +313,7 @@ const MainForm = (props) => {
                                     tableData.columns.push(colData);
                                 })
 
-                                data.map((dataItem) => {
+                                data.map((dataItem, index) => {
                                     var rowData = {
                                         orgUnit: dataItem.orgUnitName,
                                         month: moment(moment(dataItem.eventDate).year(), 'YYYY').format('YYYY') +", "+moment(moment(dataItem.eventDate).month() + 1, 'MM').format('MMMM'),
@@ -327,7 +322,7 @@ const MainForm = (props) => {
                                     dataItem.dataValues.map((dataValue) => {
 
                                         rowData[dataValue.dataElement] = dataValue.value;
-                                        rowData[selectedProgram.entityTypeName] = dataItem.trackedEntityInstance;
+                                        rowData[selectedProgram.entityTypeName] = dataItem.instanceName;
 
                                     })
                                     tableData.rows.push(rowData);
@@ -350,10 +345,8 @@ const MainForm = (props) => {
                         alert("events are null! Try again!");
                         setShowLoading(false);
                     }
-
                 });
         });
-
     };
 
     const handleBackButton = () => {
@@ -398,21 +391,17 @@ const MainForm = (props) => {
 
     const EventsTable = (eventsArray) => {
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
-        //console.log(analyzed);
-        //console.log(eventsArray);
-        console.log(dataTable);
-
 
         if((eventsArray !== null && eventsArray.length !== 0) && analyzed.length !== null && dataTable !== null){
             dataTable.columns.map((arrayItem) => {
                 analyzed.map((item) => {
                     if (item.id === arrayItem.field) {
-                        console.log("equal");
+                        //console.log("equal");
                         arrayItem.label = item.name;
                     }
                 })
 
-            })
+            });
 
             const widerData = {
                 columns: [
@@ -424,8 +413,8 @@ const MainForm = (props) => {
                 rows: [...dataTable.rows],
             };
 
-            console.log(dataTable)
-            console.log(dataTable.rows[0]);
+            //console.log(dataTable)
+            //console.log(dataTable.rows[0]);
 
 
             return (
