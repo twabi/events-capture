@@ -321,7 +321,7 @@ const MainForm = (props) => {
                          getData(tempArray)
                             .then((data) => {
                                 console.log(data);
-                                data && data[0].dataValues.map((item) => {
+                                data && data.length !== 0 && data[0].dataValues.map((item) => {
                                     var colData = {
                                         label: item.displayName,
                                         field: item.dataElement,
