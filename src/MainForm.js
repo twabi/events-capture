@@ -125,16 +125,6 @@ const MainForm = (props) => {
             } catch (e) {
                 //alert(e)
             }
-
-            const widerData = {
-                columns: [
-                    ...dataTable.columns.map((col) => {
-                        col.width = 150;
-                        return col;
-                    }),
-                ],
-                rows: [...dataTable.rows],
-            };
         }
     },[headerNames, inputs, props.organizationalUnits, props.programs]);
 
