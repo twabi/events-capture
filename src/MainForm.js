@@ -34,20 +34,7 @@ var moment = require("moment");
 
 const MainForm = (props) => {
 
-    const [showLoading, setShowLoading] = useState(false);
-    const [showEvents, setShowEvents] = useState(false);
-    const [orgUnits, setOrgUnits] = useState([]);
-    const [programs, setPrograms] = useState([]);
-    const [searchValue, setSearchValue] = useState([]);
-    const [selectedOrgUnit, setOrgUnit] = useState(undefined);
-    const [selectedProgram, setSelectedProgram] = useState(null);
-    const [events, setEvents] = useState(null);
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
-    const [showMenu, setShowMenu] = useState(true);
-    const [showPrintLoading, setShowPrintLoading] = useState(false);
-    const [headerNames, setHeaderNames] = useState([]);
-    const [dataTable, setDataTable] = useState({
+    var tableInitialState = {
         columns : [
             {
                 label: 'Org Unit',
@@ -67,7 +54,22 @@ const MainForm = (props) => {
             },
         ],
         rows : [],
-    });
+    };
+
+    const [showLoading, setShowLoading] = useState(false);
+    const [showEvents, setShowEvents] = useState(false);
+    const [orgUnits, setOrgUnits] = useState([]);
+    const [programs, setPrograms] = useState([]);
+    const [searchValue, setSearchValue] = useState([]);
+    const [selectedOrgUnit, setOrgUnit] = useState(undefined);
+    const [selectedProgram, setSelectedProgram] = useState(null);
+    const [events, setEvents] = useState(null);
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [showMenu, setShowMenu] = useState(true);
+    const [showPrintLoading, setShowPrintLoading] = useState(false);
+    const [headerNames, setHeaderNames] = useState([]);
+    const [dataTable, setDataTable] = useState(tableInitialState);
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
     const [value, setValue] = useState();
@@ -93,8 +95,8 @@ const MainForm = (props) => {
 
     const handleDateChange = (selectedValue) => {
         setValue(selectedValue);
-        const valueOfInput1 = selectedValue[0].format().split("+");
-        const valueOfInput2 = selectedValue[1].format().split("+");
+        const valueOfInput1 = selectedValue && selectedValue[0].format().split("+");
+        const valueOfInput2 = selectedValue && selectedValue[1].format().split("+");
 
         setStartDate(valueOfInput1[0])
         setEndDate(valueOfInput2[0])
@@ -105,7 +107,7 @@ const MainForm = (props) => {
        setPrograms(props.programs);
 
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
-        if(analyzed.length !== null
+        if((events !== null && events.length !== 0) && analyzed.length !== null
             && dataTable.rows.length !== 0 && inputs.length !== 0){
             dataTable.columns.map((arrayItem) => {
                 analyzed.map((item) => {
@@ -113,11 +115,16 @@ const MainForm = (props) => {
                         //console.log("equal");
                         arrayItem.label = item.name;
                     }
-                })
+                });
+                dataTable.rows.map((row, index) => {
+                    if(!row[arrayItem.field]){
+                        row[arrayItem.field] = "-";
+                    }
+                });
             });
             try{
                 dataTable.rows.map((row, index) => {
-                    if(row.event === inputs[index].event){
+                    if(row.event === events[index].event){
                         row[row.instanceTitle] = inputs[index].name;
                     }
 
@@ -126,7 +133,7 @@ const MainForm = (props) => {
                 //alert(e)
             }
         }
-    },[headerNames, inputs, props.organizationalUnits, props.programs]);
+    },[dataTable.columns, dataTable.rows, events, headerNames, inputs, props.organizationalUnits, props.programs]);
 
 
     const handle = (value, label, extra) => {
@@ -234,16 +241,15 @@ const MainForm = (props) => {
     function iterate(item, index, array) {
         //console.log(item);
         //console.log(array[index+1])
-        if (index !== array.length-1) {
-            console.log(item.dataValues.length)
-            console.log(array[index+1].dataValues.length)
+        if (index !== array.length-1 || index !== 0) {
+            //console.log(item.dataValues.length)
+            //console.log(array[index+1].dataValues.length)
             if(item.dataValues.length !== 0 || array[index+1].dataValues.length !== 0){
-                if(array[index+1].dataValues.length < item.dataValues.length){
+                if(array[index+1] && array[index+1].dataValues.length < item.dataValues.length){
                     console.log("the next element is smaller");
 
                     array[index+1].dataValues.map((arrayItem) => {
                         if (item.dataValues.some(e => e.dataElement === arrayItem.dataElement)) {
-                            /* vendors contains the element we're looking for */
                             console.log("these are similar");
                         } else {
 
@@ -268,6 +274,47 @@ const MainForm = (props) => {
                             )
                         }
                     });
+                } else if(item.dataValues.length < array[index+1] && array[index+1].dataValues.length) {
+                    console.log("the next element is larger");
+
+                    var newArray = [];
+
+                    for (var i = 0; i < array[index+1].dataValues.length; i++) {
+                        // we want to know if a[i] is found in b
+                        var match = false; // we haven't found it yet
+                        for (var j = 0; j < item.dataValues.length; j++) {
+                            if (array[index+1].dataValues[i].dataElement === item.dataValues[j].dataElement) {
+                                // we have found a[i] in b, so we can stop searching
+                                match = true;
+                                break;
+                            }
+                            // if we never find a[i] in b, the for loop will simply end,
+                            // and match will remain false
+                        }
+                        // add a[i] to newArray only if we didn't find a match.
+                        if (!match) {
+                            newArray.push(array[index+1].dataValues[i]);
+                        }
+                    }
+
+                    newArray.map((arrayTing) => {
+                        if(item.dataValues.indexOf(arrayTing) === -1) {
+                            item.dataValues.push(
+                                {"created": arrayTing.created, "dataElement": arrayTing.dataElement,
+                                    "displayName": arrayTing.displayName, "lastUpdated": arrayTing.lastUpdated,
+                                    "providedElsewhere": false, "storedBy": arrayTing.storedBy, "value": "-"}
+                            );
+                        }
+
+                        if(array[index+1].dataValues.indexOf(arrayTing) === -1) {
+                            array[index+1].dataValues.push(
+                                {"created": arrayTing.created, "dataElement": arrayTing.dataElement,
+                                    "displayName": arrayTing.displayName, "lastUpdated": arrayTing.lastUpdated,
+                                    "providedElsewhere": false, "storedBy": arrayTing.storedBy, "value": "-"}
+                            );
+                        }
+                    });
+                    console.log(newArray);
                 }
             }
         }
@@ -321,7 +368,12 @@ const MainForm = (props) => {
                          getData(tempArray)
                             .then((data) => {
                                 console.log(data);
-                                data && data.length !== 0 && data[0].dataValues.map((item) => {
+                                //var num = data && data.map(a=>a.dataValues.length).indexOf(Math.max(...data.map(a=>a.length)))
+
+                                var num = data && data.reduce((p, c, i, a) => a[p].dataValues.length > c.dataValues.length ? p : i, 0);
+                                console.log(num);
+
+                                data && data.length !== 0 && data[num].dataValues.map((item) => {
                                     var colData = {
                                         label: item.displayName,
                                         field: item.dataElement,
@@ -368,6 +420,11 @@ const MainForm = (props) => {
     };
 
     const handleBackButton = () => {
+
+        setEvents([])
+        setHeaderNames([])
+        setDataTable(tableInitialState);
+        setInputs([])
         setShowMenu(true);
         setShowEvents(false);
     }
