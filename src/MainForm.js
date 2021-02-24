@@ -39,7 +39,7 @@ const MainForm = (props) => {
     const [orgUnits, setOrgUnits] = useState([]);
     const [programs, setPrograms] = useState([]);
     const [searchValue, setSearchValue] = useState([]);
-    const [selectedOrgUnit, setOrgUnit] = useState([]);
+    const [selectedOrgUnit, setOrgUnit] = useState(undefined);
     const [selectedProgram, setSelectedProgram] = useState(null);
     const [events, setEvents] = useState(null);
     const [startDate, setStartDate] = useState("");
@@ -72,7 +72,7 @@ const MainForm = (props) => {
     const [hackValue, setHackValue] = useState();
     const [value, setValue] = useState();
     const [inputs, setInputs] = useState([]);
-    const [loaded, setLoaded] = useState(false);
+
     const disabledDate = current => {
         if (!dates || dates.length === 0) {
             return false;
@@ -131,10 +131,12 @@ const MainForm = (props) => {
 
     const handle = (value, label, extra) => {
         setSearchValue(value)
+        console.log(value);
     };
 
     const onSelect = (value, node) => {
-        setOrgUnit(selectedOrgUnit => [...selectedOrgUnit, node]);
+        //setOrgUnit(selectedOrgUnit => [...selectedOrgUnit, node]);
+        setOrgUnit(node);
         console.log(node);
     };
 
@@ -272,25 +274,19 @@ const MainForm = (props) => {
     }
 
     const  handleLoadEvents = async () => {
-
-        //console.log(selectedOrgUnit);
-        //console.log(selectedProgram);
-
         setShowLoading(true);
         var start = moment(startDate);
         var end = moment(endDate);
         var progID = selectedProgram.id;
-        var orgID = selectedOrgUnit[0].id;
-        //var trackedID = selectedInstance[0].id;
-        //console.log( progID, orgID);
+        var orgID = selectedOrgUnit.id;
 
         //var id = "edb4aTWzQaZ";
         //var id = "C3RoODpOTz5";
-        var id = "LE5Y1Da1Fk4";
+        //var id = "LE5Y1Da1Fk4";
         //var id = "l6CHbqiwSfR";
 
         getInstance().then((d2) => {
-            const endpoint = `events.json?orgUnit=${id}&program=${progID}`;
+            const endpoint = `events.json?orgUnit=${orgID}&program=${progID}`;
             var tempArray = []
             d2.Api.getApi().get(endpoint)
                 .then((response) => {
@@ -325,7 +321,7 @@ const MainForm = (props) => {
                          getData(tempArray)
                             .then((data) => {
                                 console.log(data);
-                                data[0].dataValues.map((item) => {
+                                data && data[0].dataValues.map((item) => {
                                     var colData = {
                                         label: item.displayName,
                                         field: item.dataElement,
@@ -400,31 +396,6 @@ const MainForm = (props) => {
         setShowPrintLoading(false);
     }
 
-
-    //the functions that prints the table to pdf format
-    const exportPDF = (title) => {
-        setShowPrintLoading(true);
-        const input = document.getElementById('tableDiv');
-        var width = input.style.width;
-        input.style.width = "auto";
-        const unit = "pt";
-        const size = "A4";
-        const orientation = "landscape";
-        html2canvas(input, {
-            scrollX: 0,
-            scrollY: 0
-        })
-            .then((canvas) => {
-                const pdf = new jsPDF(orientation, unit, size);
-                pdf.setFontSize(25);
-                pdf.autoTable({startY: 20, html: '#tableDiv'});
-                pdf.save(title + ".pdf");
-            })
-            .then(() => {
-                input.style.width = width;
-                setShowPrintLoading(false);
-        });
-    }
 
     const EventsTable = (eventsArray) => {
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
@@ -506,7 +477,7 @@ const MainForm = (props) => {
                     <MDBAlert color="danger" className="text-center mt-5" >
                         <p className="font-weight-bold">The Table has no data!</p>
                         <hr/>
-                        <p className="font-italic">Go back and chose either a program, org unit or date that has data.</p>
+                        <p className="font-italic">Go back and chose either a program, org unit or date range that has data.</p>
                     </MDBAlert>
                 </MDBContainer>
             );
@@ -565,10 +536,10 @@ const MainForm = (props) => {
                                                 treeData={orgUnits}
                                                 allowClear
                                                 size="large"
-                                                multiple
                                                 placeholder="Please select organizational unit"
                                                 onChange={handle}
                                                 onSelect={onSelect}
+                                                showSearch={true}
                                             />
 
                                         </div>
