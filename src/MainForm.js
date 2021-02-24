@@ -60,6 +60,7 @@ const MainForm = (props) => {
     const [hackValue, setHackValue] = useState();
     const [value, setValue] = useState();
     const [inputs, setInputs] = useState([]);
+    const [loaded, setLoaded] = useState(false);
     const disabledDate = current => {
         if (!dates || dates.length === 0) {
             return false;
@@ -155,8 +156,6 @@ const MainForm = (props) => {
                         alert("An error occurred: " + error);
                     });
             });
-
-
 
             //dataOver.dataValues = tempArray;
             //setHeaderNames(headerName => [...headerName, dataOver]);
@@ -364,22 +363,6 @@ const MainForm = (props) => {
         setShowEvents(false);
     }
 
-    const exportCSV = (title) => {
-        setShowCSV(true);
-        var table = TableExport(document.getElementById("tableDiv"), {
-            filename: title,
-            exportButtons: false,
-            sheetname: title,
-        });
-        /* convert export data to a file for download */
-        var exportData = table.getExportData();
-        console.log(exportData);
-
-        var csvData = exportData.tableDiv.csv; // Replace with the kind of file you want from the exportData
-        table.export2file(csvData.data, csvData.mimeType, csvData.filename, csvData.fileExtension, csvData.merges, csvData.RTL, csvData.sheetname);
-        setShowCSV(false);
-    }
-
     const exportXL = (title) => {
         setShowPrintLoading(true);
         var table = TableExport(document.getElementById("tableDiv"), {
@@ -390,6 +373,16 @@ const MainForm = (props) => {
         /* convert export data to a file for download */
         var exportData = table.getExportData();
         var xlsxData = exportData.tableDiv.xlsx; // Replace with the kind of file you want from the exportData
+
+        dataTable.rows.map((row) => {
+            var array2 = [];
+            dataTable.columns.map((columnItem) => {
+                var data = {v: row[columnItem.field], t : "s"}
+                array2.push(data);
+            })
+            xlsxData.data.push(array2);
+        });
+
         table.export2file(xlsxData.data, xlsxData.mimeType, xlsxData.filename, xlsxData.fileExtension, xlsxData.merges, xlsxData.RTL, xlsxData.sheetname);
         setShowPrintLoading(false);
     }
@@ -422,7 +415,7 @@ const MainForm = (props) => {
 
     const EventsTable = (eventsArray) => {
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
-        console.log(inputs);
+        //console.log(inputs);
 
         if((eventsArray !== null && eventsArray.length !== 0) && analyzed.length !== null
             && dataTable.rows.length !== 0 && inputs.length !== 0){
@@ -483,11 +476,6 @@ const MainForm = (props) => {
                                 <MDBCardFooter className="d-flex justify-content-center ">
                                     <MDBBtn color="cyan" className="text-white" onClick={()=>{exportXL("Events Table")}}>
                                         Print Excel {showPrintLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
-                                        <span className="sr-only">Loading...</span>
-                                    </div> : null}
-                                    </MDBBtn>
-                                    <MDBBtn color="cyan" className="text-white" onClick={()=>{exportCSV("Events Table")}}>
-                                        Print CSV {showCSVLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
                                         <span className="sr-only">Loading...</span>
                                     </div> : null}
                                     </MDBBtn>
