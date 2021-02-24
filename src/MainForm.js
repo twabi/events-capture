@@ -167,20 +167,6 @@ const MainForm = (props) => {
 
     };
 
-    const test = () => {
-        htmlToImage.toPng(document.getElementById('tableDiv'), { quality: 0.95 })
-            .then(function (dataUrl) {
-                var link = document.createElement('a');
-                link.download = 'my-image-name.jpeg';
-                const pdf = new jsPDF();
-                const imgProps= pdf.getImageProperties(dataUrl);
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                pdf.addImage(dataUrl, 'PNG', 0, 0,pdfWidth, pdfHeight);
-                pdf.save("download.pdf");
-            });
-    }
-
     const functionWithPromise = eventItem => { //a function that returns a promise
         getInstance().then((d2) => {
             eventItem.dataValues.map((dataValue) => {
@@ -488,9 +474,6 @@ const MainForm = (props) => {
                 ],
                 rows: [...dataTable.rows],
             };
-
-            //console.log(dataTable)
-            //console.log(dataTable.rows[0]);
 
 
             return (
