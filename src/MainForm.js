@@ -3,16 +3,12 @@ import "mdbreact/dist/css/mdb.css";
 import {
     MDBAlert,
     MDBCardFooter,
-    MDBContainer, MDBDataTable,
+    MDBContainer,
     MDBDataTableV5,
     MDBIcon,
     MDBRow,
-    MDBTable,
-    MDBTableBody,
-    MDBTableHead
 } from "mdbreact";
 import {TreeSelect,DatePicker, Space } from "antd";
-import { Redirect } from "react-router";
 import {
     MDBBox,
     MDBBtn,
@@ -30,10 +26,7 @@ import html2canvas from "html2canvas";
 import "jspdf-autotable";
 import {TableExport} from "tableexport";
 import * as htmlToImage from 'html-to-image';
-import { toPng, toJpeg, toBlob, toPixelData, toSvg } from 'html-to-image';
-import {Link} from "react-router-dom";
-import _ from "underscore";
-import dataElement from "d2/model/config/model-defaults/dataElement";
+
 
 const { RangePicker } = DatePicker;
 
@@ -53,9 +46,28 @@ const MainForm = (props) => {
     const [endDate, setEndDate] = useState("");
     const [showMenu, setShowMenu] = useState(true);
     const [showPrintLoading, setShowPrintLoading] = useState(false);
-    const [showCSVLoading, setShowCSV] = useState(false);
     const [headerNames, setHeaderNames] = useState([]);
-    const [dataTable, setDataTable] = useState(null);
+    const [dataTable, setDataTable] = useState({
+        columns : [
+            {
+                label: 'Org Unit',
+                field: 'orgUnit',
+                attributes: {
+                    'aria-controls': 'DataTable',
+                    'aria-label': 'Org Unit',
+                },
+            },
+            {
+                label: 'Month',
+                field: 'month',
+            },
+            {
+                label: 'Week',
+                field: 'week',
+            },
+        ],
+        rows : [],
+    });
     const [dates, setDates] = useState([]);
     const [hackValue, setHackValue] = useState();
     const [value, setValue] = useState();
@@ -91,7 +103,40 @@ const MainForm = (props) => {
     useEffect(() => {
        setOrgUnits(props.organizationalUnits);
        setPrograms(props.programs);
-    },[props.organizationalUnits, props.programs]);
+
+        var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
+        if(analyzed.length !== null
+            && dataTable.rows.length !== 0 && inputs.length !== 0){
+            dataTable.columns.map((arrayItem) => {
+                analyzed.map((item) => {
+                    if (item.id === arrayItem.field) {
+                        //console.log("equal");
+                        arrayItem.label = item.name;
+                    }
+                })
+            });
+            try{
+                dataTable.rows.map((row, index) => {
+                    if(row.event === inputs[index].event){
+                        row[row.instanceTitle] = inputs[index].name;
+                    }
+
+                });
+            } catch (e) {
+                //alert(e)
+            }
+
+            const widerData = {
+                columns: [
+                    ...dataTable.columns.map((col) => {
+                        col.width = 150;
+                        return col;
+                    }),
+                ],
+                rows: [...dataTable.rows],
+            };
+        }
+    },[headerNames, inputs, props.organizationalUnits, props.programs]);
 
 
     const handle = (value, label, extra) => {
@@ -281,33 +326,11 @@ const MainForm = (props) => {
                     setShowLoading(false);
                 })
                 .finally(() => {
-
-                    var tableData = {
-                        columns : [
-                            {
-                                label: 'Org Unit',
-                                field: 'orgUnit',
-                                attributes: {
-                                    'aria-controls': 'DataTable',
-                                    'aria-label': 'Org Unit',
-                                },
-                            },
-                            {
-                                label: 'Month',
-                                field: 'month',
-                            },
-                            {
-                                label: 'Week',
-                                field: 'week',
-                            },{
-                                label: selectedProgram.entityTypeName,
-                                field: selectedProgram.entityTypeName,
-                            },
-                        ],
-                        rows : [],
-                    }
-
                     if(tempArray != null){
+                        dataTable.columns.push({
+                            label: selectedProgram.entityTypeName,
+                            field: selectedProgram.entityTypeName,
+                        })
 
                          getData(tempArray)
                             .then((data) => {
@@ -317,7 +340,7 @@ const MainForm = (props) => {
                                         label: item.displayName,
                                         field: item.dataElement,
                                     }
-                                    tableData.columns.push(colData);
+                                    dataTable.columns.push(colData);
                                 })
 
                                 data.map((dataItem, index) => {
@@ -334,11 +357,11 @@ const MainForm = (props) => {
                                         rowData[selectedProgram.entityTypeName] = dataItem.instanceName;
 
                                     })
-                                    tableData.rows.push(rowData);
+                                    dataTable.rows.push(rowData);
                                 })
 
-                                console.log(tableData)
-                                setDataTable(tableData);
+                                console.log(dataTable)
+                                //setDataTable(tableData);
 
                                 tempArray = data
                                 setEvents(data);
