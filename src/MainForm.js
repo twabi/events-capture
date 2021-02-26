@@ -51,7 +51,10 @@ const MainForm = (props) => {
             {
                 label: 'Week',
                 field: 'week',
-            },
+            },{
+                label: 'Stored By',
+                field: 'storedBy',
+            }
         ],
         rows : [],
     };
@@ -374,6 +377,7 @@ const MainForm = (props) => {
                                         week: Math.ceil(moment(dataItem.eventDate).date() / 7),
                                         event: dataItem.event,
                                         instanceTitle: selectedProgram.entityTypeName,
+                                        storedBy: dataItem.storedBy,
                                     }
                                     dataItem.dataValues.map((dataValue) => {
 
