@@ -52,10 +52,7 @@ const MainForm = (props) => {
             {
                 label: 'Week',
                 field: 'week',
-            },{
-                label: 'Stored By',
-                field: 'storedBy',
-            }
+            },
         ],
         rows : [],
     };
@@ -393,7 +390,11 @@ const MainForm = (props) => {
                                         field: item.dataElement,
                                     }
                                     dataTable.columns.push(colData);
-                                })
+                                });
+                                dataTable.columns.push({
+                                    label: 'Stored By',
+                                    field: 'storedBy',
+                                });
 
                                 data.map((dataItem, index) => {
                                     var rowData = {
