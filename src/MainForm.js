@@ -577,13 +577,38 @@ const MainForm = (props) => {
         }
         else {
             return (
-                <MDBContainer>
-                    <MDBAlert color="danger" className="text-center mt-5" >
-                        <p className="font-weight-bold">The Table has no data!</p>
-                        <hr/>
-                        <p className="font-italic">Go back and chose either a program, org unit or date range that has data.</p>
-                    </MDBAlert>
-                </MDBContainer>
+                <div>
+                    <MDBBox  display="flex" justifyContent="center" className="mt-2" >
+                        <MDBCol className="mb-5" md="12">
+                            <MDBCard  className="ml-4">
+                                <MDBCardHeader tag="h5" className="text-center font-weight-bold text-uppercase py-4">
+                                    {selectedProgram.label}
+                                </MDBCardHeader>
+
+                                <MDBCardBody  >
+                                    <MDBDataTableV5
+                                        id={"tableDiv"}
+                                        striped
+                                        className="text-center"
+                                        theadColor={"primary-color"}
+                                        theadTextWhite
+                                        hover
+                                        scrollX
+                                        data={dataTable}
+                                    />
+                                </MDBCardBody>
+                                <MDBCardFooter className="d-flex justify-content-center ">
+                                    <MDBBtn color="cyan" className="text-white" onClick={()=>{exportXL("Events Table")}}>
+                                        Print Excel {showPrintLoading ? <div className="spinner-border mx-4 text-white spinner-border-sm" role="status">
+                                        <span className="sr-only">Loading...</span>
+                                    </div> : null}
+                                    </MDBBtn>
+                                </MDBCardFooter>
+                            </MDBCard>
+                        </MDBCol>
+                    </MDBBox>
+
+                </div>
             );
         }
     }
