@@ -4,11 +4,11 @@ import {
     MDBAlert,
     MDBCardFooter,
     MDBContainer,
-    MDBDataTableV5,
+    MDBDataTableV5, MDBDropdown, MDBDropdownItem, MDBDropdownMenu, MDBDropdownToggle,
     MDBIcon,
     MDBRow,
 } from "mdbreact";
-import {TreeSelect,DatePicker, Space } from "antd";
+import {TreeSelect, DatePicker, Space, Menu, Dropdown, Button} from "antd";
 import {
     MDBBox,
     MDBBtn,
@@ -21,11 +21,9 @@ import {
 import Select from "react-select";
 import NavBar from "./NavBar";
 import {getInstance} from "d2";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import "jspdf-autotable";
 import {TableExport} from "tableexport";
-import * as htmlToImage from 'html-to-image';
+import {DownOutlined} from "@ant-design/icons";
 
 
 const { RangePicker } = DatePicker;
@@ -34,6 +32,9 @@ var moment = require("moment");
 
 const MainForm = (props) => {
 
+    var periods = ["Choose By","Week", "Month"];
+    var orgUnitFilters = ["Filter By", "Markets"];
+    //var indicatorPrograms = [ "Fisheries", "APES", "SAPP", "T1", "T2", "T3", "MET", "Other"]
     var tableInitialState = {
         columns : [
             {
@@ -63,8 +64,9 @@ const MainForm = (props) => {
     const [showEvents, setShowEvents] = useState(false);
     const [orgUnits, setOrgUnits] = useState([]);
     const [programs, setPrograms] = useState([]);
-    const [searchValue, setSearchValue] = useState([]);
-    const [selectedOrgUnit, setOrgUnit] = useState(undefined);
+    const [markets, setMarkets] = useState([]);
+    const [searchValue, setSearchValue] = useState();
+    const [selectedOrgUnit, setSelectedOrgUnit] = useState(null);
     const [selectedProgram, setSelectedProgram] = useState(null);
     const [events, setEvents] = useState(null);
     const [startDate, setStartDate] = useState("");
@@ -77,13 +79,18 @@ const MainForm = (props) => {
     const [hackValue, setHackValue] = useState();
     const [value, setValue] = useState();
     const [inputs, setInputs] = useState([]);
+    const [thisPeriod, setThisPeriod] = useState(periods[0]);
+    const [range, setRange] = useState(7);
+    const [orgFilter, setOrgFilter] = useState(orgUnitFilters[0]);
+    const [choseFilter, setChoseFilter] = useState(false);
+    const [selectedMarket, setSelectedMarket] = useState(null)
 
     const disabledDate = current => {
         if (!dates || dates.length === 0) {
             return false;
         }
-        const tooLate = dates[0] && current.diff(dates[0], 'days') > 7;
-        const tooEarly = dates[1] && dates[1].diff(current, 'days') > 7;
+        const tooLate = dates[0] && current.diff(dates[0], 'days') > range;
+        const tooEarly = dates[1] && dates[1].diff(current, 'days') > range;
         return tooEarly || tooLate;
     };
 
@@ -93,6 +100,17 @@ const MainForm = (props) => {
             setDates([]);
         } else {
             setHackValue(undefined);
+        }
+    };
+
+    const handlePeriod = (value) => {
+        setThisPeriod(value);
+        if(value === "Week"){
+            setRange(7);
+        } else if(value === "Month"){
+            setRange(30);
+        } else {
+            setRange(7);
         }
     };
 
@@ -108,6 +126,7 @@ const MainForm = (props) => {
     useEffect(() => {
        setOrgUnits(props.organizationalUnits);
        setPrograms(props.programs);
+       setMarkets(props.marketOrgUnits);
 
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
         if((events !== null && events.length !== 0) && analyzed.length !== null
@@ -146,7 +165,8 @@ const MainForm = (props) => {
 
     const onSelect = (value, node) => {
         //setOrgUnit(selectedOrgUnit => [...selectedOrgUnit, node]);
-        setOrgUnit(node);
+        setSelectedOrgUnit(node);
+        setSelectedMarket(null);
         console.log(node);
     };
 
@@ -314,7 +334,12 @@ const MainForm = (props) => {
         var start = moment(startDate);
         var end = moment(endDate);
         var progID = selectedProgram.id;
-        var orgID = selectedOrgUnit.id;
+        var orgID;
+        if(selectedOrgUnit == null && selectedMarket !== null){
+            orgID = selectedMarket.id;
+        } else if(selectedMarket == null && selectedOrgUnit !== null) {
+            orgID = selectedOrgUnit.id;
+        }
 
         //var id = "edb4aTWzQaZ";
         //var id = "C3RoODpOTz5";
@@ -443,6 +468,41 @@ const MainForm = (props) => {
         setShowPrintLoading(false);
     }
 
+    const menu = (
+        <Menu>
+            {periods.map((item, index) => (
+                <Menu.Item onClick={()=>{handlePeriod(item)}}>
+                        {item}
+                </Menu.Item>
+            ))}
+        </Menu>
+    );
+
+    const handleOrgFilter = (value) => {
+        setOrgFilter(value);
+        if(value === "Markets"){
+            setChoseFilter(true);
+        } else {
+            setChoseFilter(false);
+        }
+
+    }
+
+    const handleMarketSelect = (value) => {
+        setSelectedOrgUnit(null);
+        setSelectedMarket(value);
+    }
+
+
+    const orgUnitMenu = (
+        <Menu>
+            {orgUnitFilters.map((item, index) => (
+                <Menu.Item onClick={()=>{handleOrgFilter(item)}}>
+                    {item}
+                </Menu.Item>
+            ))}
+        </Menu>
+    );
 
     const EventsTable = (eventsArray) => {
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
@@ -570,30 +630,46 @@ const MainForm = (props) => {
                                         <div className="text-left my-3">
                                             <label className="grey-text ml-2">
                                                 <strong>Select Organization Unit</strong>
+                                                <Dropdown overlay={orgUnitMenu} className="ml-3">
+                                                    <Button size="small">{orgFilter} <DownOutlined /></Button>
+                                                </Dropdown>
                                             </label>
 
-                                            <TreeSelect
-                                                style={{ width: '100%' }}
-                                                value={searchValue}
-                                                className="mt-2"
-                                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                                                treeData={orgUnits}
-                                                allowClear
-                                                size="large"
-                                                placeholder="Please select organizational unit"
-                                                onChange={handle}
-                                                onSelect={onSelect}
-                                                showSearch={true}
-                                            />
+                                            {choseFilter ?
+                                                <Select
+                                                    className="mt-2"
+                                                    onChange={handleMarketSelect}
+                                                    options={markets}
+                                                />
+                                                :
+                                                <TreeSelect
+                                                    style={{ width: '100%' }}
+                                                    value={searchValue}
+                                                    className="mt-2"
+                                                    dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                                    treeData={orgUnits}
+                                                    allowClear
+                                                    size="large"
+                                                    placeholder="Please select organizational unit"
+                                                    onChange={handle}
+                                                    onSelect={onSelect}
+                                                    showSearch={true}
+                                                />
+
+                                            }
 
                                         </div>
                                     </MDBCol>
                                     <MDBCol md="4">
                                         <div className="text-left my-3">
-                                            <label className="grey-text ml-2">
+                                            <label className="grey-text ml-2 d-inline-block ml-2">
                                                 <strong>Select Start & End Date</strong>
+                                                <Dropdown overlay={menu} className="ml-3">
+                                                    <Button size="small">{thisPeriod} <DownOutlined /></Button>
+                                                </Dropdown>
                                             </label>
                                             <Space direction="vertical" size={12}>
+
                                                 <RangePicker
                                                     className="mt-2"
                                                     style={{ width: '100%' }}

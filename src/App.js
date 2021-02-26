@@ -12,6 +12,7 @@ function App() {
 
     const [orgUnits, setOrgUnits] = React.useState([]);
     const [programs, setPrograms]= React.useState([]);
+    const [markets, setMarkets] = React.useState([]);
 
     //initializing an array-to-tree library that will turn an array of org units into a tree form
     var arrayToTree = require("array-to-tree");
@@ -19,21 +20,25 @@ function App() {
     React.useEffect(() => {
 
         getInstance().then((d2) => {
-            const endpoint = "programs.json?paging=false"
-            const unitEndpoint = "organisationUnits.json?paging=false&fields=name&fields=id&fields=parent"
+            const endpoint = "programs.json?paging=false";
+            const unitEndpoint = "organisationUnits.json?paging=false&fields=name&fields=id&fields=parent";
+            const marketsEndPoint = "organisationUnitGroups/Lp9RVPodv0V.json?fields=organisationUnits[id,name]";
             d2.Api.getApi().get(endpoint)
                 .then((response) => {
-                    console.log(response.programs)
+                    console.log(response.programs);
+
                     const tempArray = []
                     response.programs.map((item, index) => {
-                        tempArray.push({"id" : item.id, "label" : item.displayName})
+                        if(item.displayName.includes("AMIS")){
+                            tempArray.push({"id" : item.id, "label" : item.displayName})
+                        }
                     });
                     setPrograms(tempArray);
                 })
                 .catch((error) => {
                     console.log(error);
                     alert("An error occurred: " + error);
-            })
+            });
 
             d2.Api.getApi().get(unitEndpoint)
                 .then((response) => {
@@ -67,7 +72,22 @@ function App() {
                     console.log(error);
                     alert("An error occurred: " + error);
             });
-        })
+
+            d2.Api.getApi().get(marketsEndPoint)
+                .then((response) => {
+                    console.log(response.organisationUnits);
+
+                    const tempArray = []
+                    response.organisationUnits.map((item) => {
+                        tempArray.push({"id" : item.id, "label" : item.name})
+                    });
+                    setMarkets(tempArray);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    alert("An error occurred: " + error);
+                });
+        });
 
     }, [arrayToTree])
 
@@ -78,7 +98,8 @@ function App() {
             <Route path="/"  render={(props) => (
                 <MainForm {...props}
                           programs={programs}
-                         organizationalUnits={orgUnits}/>
+                         organizationalUnits={orgUnits}
+                         marketOrgUnits={markets}/>
             )} exact/>
         </Switch>
     </Fragment>

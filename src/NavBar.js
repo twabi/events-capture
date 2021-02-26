@@ -16,7 +16,7 @@ class NavBar extends React.Component {
                     <Toolbar>
                         <div >
                             <Typography variant="title" color="inherit">
-                                <h3 className="text-white">Reporting Tracker For Amis</h3>
+                                <h3 className="text-white">Reporting Tracker For AMIS</h3>
                             </Typography>
                         </div>
                     </Toolbar>
