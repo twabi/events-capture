@@ -1,13 +1,11 @@
 {
-    "version": "0.1",
+    "version": "1.0.0",
     "name": "Events Capture App",
     "description": "My App is a Packaged App",
-    "launch_path": "/src/index.js",
+    "launch_path": "index.html",
     "appType": "APP",
     "icons": {
-        "16": "/src/events.png",
         "48": "/src/events.png",
-        "128": "/src/events.png"
     },
     "developer": {
         "name": "Ahmed Twabi",
@@ -17,7 +15,6 @@
     "activities": {
         "dhis": {
             "href": "*",
-            "namespace": "events-namespace"
         }
     },
     "authorities": [
