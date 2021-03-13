@@ -703,7 +703,7 @@ const MainForm = (props) => {
                                                     style={{ width: '100%' }}
                                                     value={treeValue}
                                                     className="mt-2"
-                                                    dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                                    dropdownStyle={{ maxHeight: 400, overflow: 'auto'}}
                                                     treeData={treeMarkets}
                                                     allowClear
                                                     size="large"

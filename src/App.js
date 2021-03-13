@@ -85,15 +85,16 @@ function App() {
                     setMarkets(tempArray);
 
 
-                    var tempVar = {};
+                    //var tempVar = {};
                     var anotherArray = [];
                     response.organisationUnits.map((item, index) => {
                         item.title = item.name;
                         item.value = item.name.replace(/ /g, "") + "-" + index;
                         item.ancestors.map((ancestor, number) => {
-                            if(ancestor.level === 2){
+
+                            if(ancestor.level === 3){
                                 item.parent = ancestor.id
-                                ancestor.parent = ancestor.parent.id
+                                ancestor.parent = ""
                                 ancestor.title = ancestor.name;
                                 ancestor.value = ancestor.name.replace(/ /g, "") + "-" + (index+number);
                                 anotherArray.push(ancestor);
@@ -101,7 +102,7 @@ function App() {
                                 ancestor.parent = undefined;
                                 ancestor.title = ancestor.name;
                                 ancestor.value = ancestor.name.replace(/ /g, "") + "-" + (index+number);
-                                tempVar = ancestor;
+                                //tempVar = ancestor;
                             }
                         });
                         if(item.parent != null){
@@ -116,7 +117,7 @@ function App() {
 
                     console.log(anotherArray)
                     response.organisationUnits = response.organisationUnits.concat(anotherArray);
-                    response.organisationUnits.push(tempVar);
+                    //response.organisationUnits.push(tempVar);
 
                     //do the array-to-tree thing using the parent and id fields in each org unit
                     var tree = arrayToTree(response.organisationUnits, {

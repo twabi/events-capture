@@ -7,7 +7,7 @@
     }
   },
   "appType": "APP",
-  "name": "events-capture",
+  "name": "AMIS Reporting Tracker",
   "version": "0.1.0",
   "manifest_generated_at": "Sat Mar 13 2021 12:36:36 GMT+0200 (Central Africa Time)",
   "description": "my packaged app",
