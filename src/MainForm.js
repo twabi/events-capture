@@ -1,23 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import "mdbreact/dist/css/mdb.css";
-import {
-    MDBAlert,
-    MDBCardFooter,
-    MDBContainer,
-    MDBDataTableV5, MDBDropdown, MDBDropdownItem, MDBDropdownMenu, MDBDropdownToggle,
-    MDBIcon,
-    MDBRow,
-} from "mdbreact";
-import {TreeSelect, DatePicker, Space, Menu, Dropdown, Button} from "antd";
 import {
     MDBBox,
     MDBBtn,
-    MDBCard, MDBCardHeader,
+    MDBCard,
     MDBCardBody,
+    MDBCardFooter,
+    MDBCardHeader,
     MDBCardText,
     MDBCardTitle,
-    MDBCol
+    MDBCol,
+    MDBContainer,
+    MDBDataTableV5,
+    MDBIcon,
+    MDBRow, MDBTable, MDBTableBody, MDBTableHead,
 } from "mdbreact";
+import {Button, DatePicker, Dropdown, Menu, Space, TreeSelect} from "antd";
 import Select from "react-select";
 import NavBar from "./NavBar";
 import {getInstance} from "d2";
@@ -154,6 +152,18 @@ const MainForm = (props) => {
             } catch (e) {
                 //alert(e)
             }
+        } else {
+            var tbody = document.querySelector('tbody');
+
+            if(tbody != null){
+                let error = document.createElement('td');
+                error.setAttribute('colspan', `${dataTable.columns.length}`);
+                //error.innerText='No records found. The selected program and market does not have data during this period';
+                error.innerHTML = "<div><p><b>No records found</b></p><p><i>The selected program and market does not have data during this period</i></p><div/>";
+                //document.querySelector('tbody').innerHTML = "";
+                //document.querySelector('tbody').appendChild(error);
+            }
+
         }
     },[dataTable.columns, dataTable.rows, events, headerNames, inputs, props.organizationalUnits, props.programs]);
 
@@ -353,8 +363,6 @@ const MainForm = (props) => {
             orgID = selectedOrgUnit.id;
         }
 
-        console.log(orgID);
-
         //var id = "edb4aTWzQaZ";
         //var id = "C3RoODpOTz5";
         //var id = "LE5Y1Da1Fk4";
@@ -463,27 +471,32 @@ const MainForm = (props) => {
     }
 
     const exportXL = (title) => {
-        setShowPrintLoading(true);
-        var table = TableExport(document.getElementById("tableDiv"), {
-            filename: title,
-            exportButtons: false,
-            sheetname: title,
-        });
-        /* convert export data to a file for download */
-        var exportData = table.getExportData();
-        var xlsxData = exportData.tableDiv.xlsx; // Replace with the kind of file you want from the exportData
+        if(dataTable.rows.length !== 0){
+            setShowPrintLoading(true);
+            var table = TableExport(document.getElementById("tableDiv"), {
+                filename: title,
+                exportButtons: false,
+                sheetname: title,
+            });
+            /* convert export data to a file for download */
+            var exportData = table.getExportData();
+            var xlsxData = exportData.tableDiv.xlsx; // Replace with the kind of file you want from the exportData
 
-        dataTable.rows.map((row) => {
-            var array2 = [];
-            dataTable.columns.map((columnItem) => {
-                var data = {v: row[columnItem.field], t : "s"}
-                array2.push(data);
-            })
-            xlsxData.data.push(array2);
-        });
+            dataTable.rows.map((row) => {
+                var array2 = [];
+                dataTable.columns.map((columnItem) => {
+                    var data = {v: row[columnItem.field], t : "s"}
+                    array2.push(data);
+                })
+                xlsxData.data.push(array2);
+            });
 
-        table.export2file(xlsxData.data, xlsxData.mimeType, xlsxData.filename, xlsxData.fileExtension, xlsxData.merges, xlsxData.RTL, xlsxData.sheetname);
-        setShowPrintLoading(false);
+            table.export2file(xlsxData.data, xlsxData.mimeType, xlsxData.filename, xlsxData.fileExtension, xlsxData.merges, xlsxData.RTL, xlsxData.sheetname);
+            setShowPrintLoading(false);
+        } else{
+            alert("There's no data in the table");
+        }
+
     }
 
     const menu = (
@@ -604,16 +617,23 @@ const MainForm = (props) => {
                                 </MDBCardHeader>
 
                                 <MDBCardBody  >
-                                    <MDBDataTableV5
-                                        id={"tableDiv"}
-                                        striped
-                                        className="text-center"
-                                        theadColor={"primary-color"}
-                                        theadTextWhite
-                                        hover
-                                        scrollX
-                                        data={dataTable}
-                                    />
+                                    <MDBTable>
+                                        <MDBTableHead color="primary-color" textWhite>
+                                            <tr>
+                                                <th>Org Unit</th>
+                                                <th>Month</th>
+                                                <th>Week</th>
+                                                <th>Stored By</th>
+                                            </tr>
+                                        </MDBTableHead>
+                                        <MDBTableBody>
+                                            <tr>
+                                                <td colSpan={4} className="text-center">
+                                                    <div><p><b>No records found</b></p><p><i>The selected program and market does not have data during this period</i></p></div>
+                                                </td>
+                                            </tr>
+                                        </MDBTableBody>
+                                    </MDBTable>
                                 </MDBCardBody>
                                 <MDBCardFooter className="d-flex justify-content-center ">
                                     <MDBBtn color="cyan" className="text-white" onClick={()=>{exportXL("Events Table")}}>
