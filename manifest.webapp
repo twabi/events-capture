@@ -1,0 +1,21 @@
+{
+  "launch_path": "index.html",
+  "default_locale": "en",
+  "activities": {
+    "dhis": {
+      "href": "*"
+    }
+  },
+  "appType": "APP",
+  "name": "events-capture",
+  "version": "0.1.0",
+  "manifest_generated_at": "Sat Mar 13 2021 12:36:36 GMT+0200 (Central Africa Time)",
+  "description": "my packaged app",
+  "icons": {
+    "48": "/src/events.png"
+  },
+  "developer": {
+    "name": "Ahmed Twabi",
+    "url": "https://github.com/twabi"
+  }
+}
