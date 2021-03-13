@@ -81,6 +81,8 @@ const MainForm = (props) => {
     const [orgFilter, setOrgFilter] = useState(orgUnitFilters[0]);
     const [choseFilter, setChoseFilter] = useState(false);
     const [selectedMarket, setSelectedMarket] = useState(null)
+    const [treeMarkets, setTreeMarkets] = useState(null);
+    const [treeValue, setTreeValue] = useState();
 
     const disabledDate = current => {
         if (!dates || dates.length === 0) {
@@ -124,6 +126,7 @@ const MainForm = (props) => {
        setOrgUnits(props.organizationalUnits);
        setPrograms(props.programs);
        setMarkets(props.marketOrgUnits);
+       setTreeMarkets(props.treeMarkets);
 
         var analyzed = headerNames.slice().filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
         if((events !== null && events.length !== 0) && analyzed.length !== null
@@ -161,6 +164,18 @@ const MainForm = (props) => {
     };
 
     const onSelect = (value, node) => {
+        //setOrgUnit(selectedOrgUnit => [...selectedOrgUnit, node]);
+        setSelectedOrgUnit(node);
+        setSelectedMarket(null);
+        console.log(node);
+    };
+
+    const handleTree = (value, label, extra) => {
+        setTreeValue(value)
+        console.log(value);
+    };
+
+    const onSelectTree = (value, node) => {
         //setOrgUnit(selectedOrgUnit => [...selectedOrgUnit, node]);
         setSelectedOrgUnit(node);
         setSelectedMarket(null);
@@ -337,6 +352,8 @@ const MainForm = (props) => {
         } else if(selectedMarket == null && selectedOrgUnit !== null) {
             orgID = selectedOrgUnit.id;
         }
+
+        console.log(orgID);
 
         //var id = "edb4aTWzQaZ";
         //var id = "C3RoODpOTz5";
@@ -662,10 +679,18 @@ const MainForm = (props) => {
                                             </label>
 
                                             {choseFilter ?
-                                                <Select
+                                                <TreeSelect
+                                                    style={{ width: '100%' }}
+                                                    value={treeValue}
                                                     className="mt-2"
-                                                    onChange={handleMarketSelect}
-                                                    options={markets}
+                                                    dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                                    treeData={treeMarkets}
+                                                    allowClear
+                                                    size="large"
+                                                    placeholder="Please select organizational unit"
+                                                    onChange={handleTree}
+                                                    onSelect={onSelectTree}
+                                                    showSearch={true}
                                                 />
                                                 :
                                                 <TreeSelect
