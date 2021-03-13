@@ -12,7 +12,7 @@
   "manifest_generated_at": "Sat Mar 13 2021 12:36:36 GMT+0200 (Central Africa Time)",
   "description": "my packaged app",
   "icons": {
-    "48": "/src/events.png"
+    "48": "logo512.png"
   },
   "developer": {
     "name": "Ahmed Twabi",

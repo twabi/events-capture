@@ -9,7 +9,7 @@ import "bootstrap-css-only/css/bootstrap.min.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { init } from "d2";
-import {BrowserRouter} from "react-router-dom";
+import {BrowserRouter, HashRouter} from "react-router-dom";
 
 const basicAuth = "Basic " + btoa("ahmed:Atwabi@20");
 
@@ -24,9 +24,9 @@ const withBaseUrl = (baseUrl) => {
         },
     });
     ReactDOM.render(
-        <BrowserRouter>
+        <HashRouter>
             <App />
-        </BrowserRouter>, document.getElementById("root"));
+        </HashRouter>, document.getElementById("root"));
 };
 withBaseUrl(developmentServer);
 // If you want to start measuring performance in your app, pass a function
