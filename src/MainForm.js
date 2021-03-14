@@ -783,7 +783,7 @@ const MainForm = (props) => {
                 </MDBCol>
             </MDBBox>: null}
             { showEvents ?
-                <div className="overflow-hidden">
+                <div className="overflow-hidden mt-5">
                     <MDBRow>
                         <MDBCol>
                             <MDBBtn color="cyan"
