@@ -22,6 +22,8 @@ import {getInstance} from "d2";
 import "jspdf-autotable";
 import {TableExport} from "tableexport";
 import {DownOutlined} from "@ant-design/icons";
+import {HeaderBar} from "@dhis2/ui-widgets";
+import Header from "@dhis2/d2-ui-header-bar"
 
 
 const { RangePicker } = DatePicker;
@@ -81,6 +83,10 @@ const MainForm = (props) => {
     const [selectedMarket, setSelectedMarket] = useState(null)
     const [treeMarkets, setTreeMarkets] = useState(null);
     const [treeValue, setTreeValue] = useState();
+    const [D2, setD2] = useState();
+    getInstance().then(d2 =>{
+        setD2(d2);
+    })
 
     const disabledDate = current => {
         if (!dates || dates.length === 0) {
@@ -165,7 +171,7 @@ const MainForm = (props) => {
             }
 
         }
-    },[dataTable.columns, dataTable.rows, events, headerNames, inputs, props.organizationalUnits, props.programs]);
+    },[dataTable.columns, dataTable.rows, events, headerNames, inputs, props.organizationalUnits, props.programs, props.d2, props.marketOrgUnits, props.treeMarkets]);
 
 
     const handle = (value, label, extra) => {
@@ -502,7 +508,7 @@ const MainForm = (props) => {
     const menu = (
         <Menu>
             {periods.map((item, index) => (
-                <Menu.Item onClick={()=>{handlePeriod(item)}}>
+                <Menu.Item key={index} onClick={()=>{handlePeriod(item)}}>
                         {item}
                 </Menu.Item>
             ))}
@@ -528,7 +534,7 @@ const MainForm = (props) => {
     const orgUnitMenu = (
         <Menu>
             {orgUnitFilters.map((item, index) => (
-                <Menu.Item onClick={()=>{handleOrgFilter(item)}}>
+                <Menu.Item key={index} onClick={()=>{handleOrgFilter(item)}}>
                     {item}
                 </Menu.Item>
             ))}
@@ -654,13 +660,14 @@ const MainForm = (props) => {
 
     return (
         <div>
-            <NavBar/>
+            {D2 && <Header d2={D2}/>}
+            <NavBar className="mt-5"/>
             {showMenu ?
-            <MDBBox display="flex" justifyContent="center" >
+            <MDBBox className="mt-5" display="flex" justifyContent="center" >
                 <MDBCol className="mb-5" md="10">
                     <MDBCard display="flex" justifyContent="center" className="text-xl-center w-100">
                         <MDBCardBody>
-                            <MDBCardTitle >
+                            <MDBCardTitle>
                                 <strong>Tracker Events Capture</strong>
                             </MDBCardTitle>
 

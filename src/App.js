@@ -14,6 +14,7 @@ function App() {
     const [programs, setPrograms]= React.useState([]);
     const [markets, setMarkets] = React.useState([]);
     const [treeMarkets, setTreeMarkets] = React.useState([]);
+    const [D2, setD2] = React.useState();
 
     //initializing an array-to-tree library that will turn an array of org units into a tree form
     var arrayToTree = require("array-to-tree");
@@ -21,6 +22,7 @@ function App() {
     React.useEffect(() => {
 
         getInstance().then((d2) => {
+            setD2(d2);
             const endpoint = "programs.json?paging=false";
             const unitEndpoint = "organisationUnits.json?paging=false&fields=name&fields=id&fields=parent";
             const marketsEndPoint = "organisationUnitGroups/Lp9RVPodv0V.json?fields=organisationUnits[id,name,level,ancestors[id,name,level,parent]]";
@@ -143,6 +145,7 @@ function App() {
         <Switch>
             <Route path="/"  render={(props) => (
                 <MainForm {...props}
+                          d2={D2}
                           programs={programs}
                           treeMarkets={treeMarkets}
                          organizationalUnits={orgUnits}

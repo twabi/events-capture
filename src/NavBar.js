@@ -12,12 +12,10 @@ class NavBar extends React.Component {
 
         return(
             <div>
-                <AppBar position="sticky" className="mb-5 text-white">
+                <AppBar position="relative" className="mt-5 mb-5 text-white">
                     <Toolbar>
                         <div >
-                            <Typography variant="title" color="inherit">
                                 <h3 className="text-white">Reporting Tracker For AMIS</h3>
-                            </Typography>
                         </div>
                     </Toolbar>
                 </AppBar>

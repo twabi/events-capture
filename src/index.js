@@ -10,8 +10,19 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { init } from "d2";
 import {BrowserRouter, HashRouter} from "react-router-dom";
+import { Provider } from '@dhis2/app-runtime'
 
 const basicAuth = "Basic " + btoa("ahmed:Atwabi@20");
+
+const appConfig = {
+    baseUrl: 'https://covmw.com/namistest/',
+    apiVersion: 0,
+    headers:{
+        Authorization: basicAuth,
+        "Content-Type": "application/json",
+        withCredentials: true
+    }
+}
 
 const developmentServer = "https://covmw.com/namistest/api/";
 const withBaseUrl = (baseUrl) => {
@@ -24,9 +35,12 @@ const withBaseUrl = (baseUrl) => {
         },
     });
     ReactDOM.render(
-        <HashRouter>
-            <App />
-        </HashRouter>, document.getElementById("root"));
+        <Provider config={appConfig}>
+            <HashRouter>
+                <App/>
+            </HashRouter>
+        </Provider>
+        , document.getElementById("root"));
 };
 withBaseUrl(developmentServer);
 // If you want to start measuring performance in your app, pass a function
