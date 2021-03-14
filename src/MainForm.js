@@ -615,7 +615,7 @@ const MainForm = (props) => {
         else {
             return (
                 <div>
-                    <MDBBox  display="flex" justifyContent="center" className="mt-2" >
+                    <MDBBox  display="flex" justifyContent="center" className="mt-4" >
                         <MDBCol className="mb-5" md="12">
                             <MDBCard  className="ml-4">
                                 <MDBCardHeader tag="h5" className="text-center font-weight-bold text-uppercase py-4">
@@ -660,11 +660,10 @@ const MainForm = (props) => {
 
     return (
         <div>
-            {D2 && <Header d2={D2}/>}
-            <NavBar className="mt-5"/>
+            {D2 && <Header className="mb-5" d2={D2}/>}
             {showMenu ?
             <MDBBox className="mt-5" display="flex" justifyContent="center" >
-                <MDBCol className="mb-5" md="10">
+                <MDBCol className="mb-5 mt-5" md="10">
                     <MDBCard display="flex" justifyContent="center" className="text-xl-center w-100">
                         <MDBCardBody>
                             <MDBCardTitle>
