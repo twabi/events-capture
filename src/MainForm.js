@@ -667,11 +667,11 @@ const MainForm = (props) => {
                     <MDBCard display="flex" justifyContent="center" className="text-xl-center w-100">
                         <MDBCardBody>
                             <MDBCardTitle>
-                                <strong>Tracker Events Capture</strong>
+                                <strong>AMIS Reporting Tracker</strong>
                             </MDBCardTitle>
 
                             <MDBCardText>
-                                <strong>Select Event Details</strong>
+                                <strong>Select Event Program, Org Unit and Period</strong>
                             </MDBCardText>
 
                             {programs.length == 0 ? <div className="spinner-border mx-2 indigo-text spinner-border-sm" role="status">
@@ -772,7 +772,7 @@ const MainForm = (props) => {
                             <div className="text-center py-4 mt-2">
 
                                 <MDBBtn color="cyan" className="text-white" onClick={handleLoadEvents}>
-                                    Show Events {showLoading ? <div className="spinner-border mx-2 text-white spinner-border-sm" role="status">
+                                    Show Data {showLoading ? <div className="spinner-border mx-2 text-white spinner-border-sm" role="status">
                                     <span className="sr-only">Loading...</span>
                                 </div> : null}
                                 </MDBBtn>
