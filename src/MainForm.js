@@ -254,8 +254,12 @@ const MainForm = (props) => {
                 const entityPoint = `trackedEntityInstances/${eventItem.trackedEntityInstance}.json?program=${eventItem.program}&fields=attributes[value]`
                 d2.Api.getApi().get(entityPoint).then((response) => {
                     console.log(response);
-                    eventItem.instanceName = response.attributes[0].value;
-                    var data = {"event" : eventItem.event, "name" : response.attributes[0].value}
+                    var name = response.attributes[1].value;
+                    if(name === "FC" || name ===  "MP"){
+                        name = response.attributes[0].value
+                    }
+                    eventItem.instanceName = name;
+                    var data = {"event" : eventItem.event, "name" : name}
                     setInputs(inputs => [...inputs, data]);
                 }).catch((error) => {
                     console.log("An error occurred: " + error);
@@ -379,12 +383,16 @@ const MainForm = (props) => {
             var tempArray = []
             d2.Api.getApi().get(endpoint)
                 .then((response) => {
-
                     response.events.map((item) => {
-                        var date = moment(item.eventDate);
-                        if(date.isBetween(start, end)){
+                        var date = moment(item.eventDate, "YYYY-MM-DDTHH:mm:ss.SSS");
+                        var dateText = date.format("YYYY-MM-DD")
+                        var startText = start.format("YYYY-MM-DD");
+                        var endText = end.format("YYYY-MM-DD");
+
+                        if(moment(dateText).isBetween(startText, endText, undefined, '[]')){
                             tempArray.push(item);
                         }
+
                     });
 
                     functionTracked(tempArray).then((data) => {

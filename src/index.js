@@ -12,8 +12,8 @@ import { init } from "d2";
 import {BrowserRouter, HashRouter} from "react-router-dom";
 import { Provider } from '@dhis2/app-runtime'
 
+//const basicAuth = "Basic " + btoa("ahmed:@Ahmed20");
 const basicAuth = "Basic " + btoa("ahmed:Atwabi@20");
-
 const appConfig = {
     baseUrl: 'https://covmw.com/namistest/',
     apiVersion: 0,
