@@ -28,13 +28,13 @@ function App() {
             const marketsEndPoint = "organisationUnitGroups/Lp9RVPodv0V.json?fields=organisationUnits[id,name,level,ancestors[id,name,level,parent]]";
             d2.Api.getApi().get(endpoint)
                 .then((response) => {
-                    //console.log(response.programs);
+                    console.log(response.programs);
 
                     const tempArray = []
                     response.programs.map((item, index) => {
-                        if(item.displayName.includes("AMIS")){
+                        //if(item.displayName.includes("AMIS")){
                             tempArray.push({"id" : item.id, "label" : item.displayName})
-                        }
+                        //}
                     });
                     setPrograms(tempArray);
                 })
