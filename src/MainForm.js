@@ -211,8 +211,8 @@ const MainForm = (props) => {
                     setSelectedProgram(selectedOption);
                 })
                 .catch((error) => {
-                    console.log("An error occurred: " + error);
-                    alert("An error occurred: " + error);
+                    console.log("An error occurred: " + JSON.stringify(error));
+                    //alert("An error occurred: " + JSON.stringify(error));
                 });
         });
 
@@ -220,7 +220,8 @@ const MainForm = (props) => {
 
     const functionWithPromise = eventItem => { //a function that returns a promise
         getInstance().then((d2) => {
-            eventItem.dataValues.map((dataValue) => {
+            //console.log(eventItem);
+            eventItem.dataValues&&eventItem.dataValues.map((dataValue) => {
                 const endpoint = `dataElements/${dataValue.dataElement}.json`;
                 d2.Api.getApi().get(endpoint)
                     .then((response) => {
@@ -233,8 +234,8 @@ const MainForm = (props) => {
                         setHeaderNames(headerName => [...headerName, data]);
                     })
                     .catch((error) => {
-                        console.log("An error occurred: " + error);
-                        alert("An error occurred: " + error);
+                        console.log("An error occurred: " + JSON.stringify(error));
+                        //alert("An error occurred: " + JSON.stringify(error));
                     });
             });
 
@@ -251,6 +252,7 @@ const MainForm = (props) => {
     const functionTracked = async (array) => { //a function that returns a promise
         await Promise.all(array.map((eventItem) => {
             getInstance().then((d2) => {
+                //console.log(eventItem);
                 const entityPoint = `trackedEntityInstances/${eventItem.trackedEntityInstance}.json?program=${eventItem.program}&fields=attributes[value]`
                 d2.Api.getApi().get(entityPoint).then((response) => {
                     console.log(response);
@@ -262,8 +264,8 @@ const MainForm = (props) => {
                     var data = {"event" : eventItem.event, "name" : name}
                     setInputs(inputs => [...inputs, data]);
                 }).catch((error) => {
-                    console.log("An error occurred: " + error);
-                    alert("An error occurred: " + error);
+                    console.log("An error occurred: " + JSON.stringify(error));
+                    //alert("An error occurred: " + JSON.stringify(error));
                 })
             })
         }));
@@ -283,9 +285,9 @@ const MainForm = (props) => {
         //console.log(item);
         //console.log(array[index+1])
         if (index !== array.length-1 || index !== 0) {
-            //console.log(item.dataValues.length)
-            //console.log(array[index+1].dataValues.length)
-            if(item.dataValues.length !== 0 || array[index+1].dataValues.length !== 0){
+            //console.log(item)
+            //console.log(array[index+1])
+            if((item.dataValues&&item.dataValues.length !== 0) || (array[index+1]&&array[index+1].dataValues&&array[index+1].dataValues.length !== 0)){
                 if(array[index+1] && array[index+1].dataValues.length < item.dataValues.length){
                     console.log("the next element is smaller");
 
@@ -379,10 +381,11 @@ const MainForm = (props) => {
         //var id = "l6CHbqiwSfR";
 
         getInstance().then((d2) => {
-            const endpoint = `events.json?orgUnit=${orgID}&program=${progID}`;
+            const endpoint = `events.json?paging=false&fields=*&orgUnit=${orgID}&program=${progID}`;
             var tempArray = []
             d2.Api.getApi().get(endpoint)
                 .then((response) => {
+                    //console.log(response.events);
                     response.events.map((item) => {
                         var date = moment(item.eventDate, "YYYY-MM-DDTHH:mm:ss.SSS");
                         var dateText = date.format("YYYY-MM-DD")
@@ -392,11 +395,11 @@ const MainForm = (props) => {
                         if(moment(dateText).isBetween(startText, endText, undefined, '[]')){
                             tempArray.push(item);
                         }
-
                     });
 
+                    //console.log(tempArray);
                     functionTracked(tempArray).then((data) => {
-                        console.log(data);
+                        //console.log(data);
                         tempArray = data;
                         tempArray.forEach(iterate);
                     }).finally(() => {
@@ -405,7 +408,7 @@ const MainForm = (props) => {
             })
                 .catch((err) => {
                     console.log("An error occurred: " + err);
-                    alert("An error occurred: " + err);
+                    alert("An error occurred: " + err.message);
                     setShowLoading(false);
                 })
                 .finally(() => {
@@ -417,13 +420,13 @@ const MainForm = (props) => {
 
                          getData(tempArray)
                             .then((data) => {
-                                console.log(data);
+                                //console.log(data);
                                 //var num = data && data.map(a=>a.dataValues.length).indexOf(Math.max(...data.map(a=>a.length)))
 
-                                var num = data && data.reduce((p, c, i, a) => a[p].dataValues.length > c.dataValues.length ? p : i, 0);
+                                var num = data&&data.reduce((p, c, i, a) => (a[p]&&a[p].dataValues&&a[p].dataValues.length > c&&c.dataValues&&c.dataValues.length ? p : i), 0);
                                 console.log(num);
 
-                                data && data.length !== 0 && data[num].dataValues.map((item) => {
+                                data&&data.length !== 0&&data[num]&&data[num].dataValues&&data[num].dataValues.map((item) => {
                                     var colData = {
                                         label: item.displayName,
                                         field: item.dataElement,
@@ -444,7 +447,7 @@ const MainForm = (props) => {
                                         instanceTitle: selectedProgram.entityTypeName,
                                         storedBy: dataItem.storedBy,
                                     }
-                                    dataItem.dataValues.map((dataValue) => {
+                                    dataItem.dataValues&&dataItem.dataValues.map((dataValue) => {
 
                                         rowData[dataValue.dataElement] = dataValue.value;
                                         rowData[selectedProgram.entityTypeName] = dataItem.instanceName;

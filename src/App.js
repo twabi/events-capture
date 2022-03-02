@@ -32,9 +32,9 @@ function App() {
 
                     const tempArray = []
                     response.programs.map((item, index) => {
-                        //if(item.displayName.includes("AMIS")){
+                        if(item.displayName.includes("AMIS")){
                             tempArray.push({"id" : item.id, "label" : item.displayName})
-                        //}
+                        }
                     });
                     setPrograms(tempArray);
                 })
